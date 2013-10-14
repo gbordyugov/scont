@@ -10,6 +10,9 @@ ntst = 9
 dsmin = 1.0e-9
 dsmax = 5.0e-1
 
+# by how much reduce/increase the step size
+step_factor = 1.5
+
 
 
 def f(u, p):
@@ -31,16 +34,23 @@ def dfdp(u, p):
 
 
 def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
+  """
+  the main function for performing continuation
+  """
+
   def compute_ext_rhs(x, p, x0, p0, xp, pp, ds):
+    """ computes right-hand side of the extenden system """
     return hstack([f(x, p), dot(x-x0, xp) + (p-p0)*pp - ds])
 
 
   def build_ext_matrix(x, p, tv):
+    """ builds the Jacobian matrix of the extenden system """
     m = hstack([dfdx(x, p), dfdp(x, p)[:,newaxis]])
     return vstack([m, tv])
 
 
   def compute_tangent_vector(x, p, old=None):
+    """ computes tangent vector along the solution branch """
     if old is not None:
       tv = old
     else:
@@ -55,7 +65,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
     return tv/norm(tv)
 
 
-  res = hstack([x0, p0])
+  res         = hstack([x0, p0])
   predictions = hstack([x0, p0])
 
   tv = compute_tangent_vector(x0, p0)
@@ -66,24 +76,22 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
   while cstep < nsteps:
     print 'cstep:', cstep
     cstep += 1
-    # prediction  
-    x = x0 + xp*ds
+
+    x = x0 + xp*ds # prediction
     p = p0 + pp*ds
     predictions = vstack([predictions, hstack([x, p])])
 
     nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
-    print 'norm:', nrm
+    print '   initial norm:', nrm
     nstep = 0
-    # Newton's iterations
+
     while nrm > tol and nstep < ntst:
-      # build matrix
       m = build_ext_matrix(x, p, tv)
 
-      # build RHS
       b = compute_ext_rhs(x, p, x0, p0, xp, pp, ds)
       du = solve(m, -b)
 
-      x += du[:-1]
+      x += du[:-1] # Newton's correction
       p += du[ -1]
       nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
       print 'nstep', nstep, ',  norm:', nrm
@@ -92,24 +100,22 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
 
     if nrm <= tol:
       print 'converged, stepsize:', ds
+
       x0, p0 = x, p
       res = vstack([res, hstack([x, p])])
 
-      # compute tangent vector
-      # tv = compute_tangent_vector(x, p, hstack([xp, pp]))
       tv = compute_tangent_vector(x, p, tv)
       xp = tv[:-1]
       pp = tv[ -1]
 
-      step_factor = 1.5
-      if nstep <= nsteps/2 and abs(ds*step_factor) < abs(dsmax):
+      if nstep <= ntst/2 and abs(ds*step_factor) < abs(dsmax):
         print 'increasing step to', ds*step_factor
-        ds *= step_factor
+        ds = ds*step_factor
       
-    else:
+    else: # not yet converged
       if abs(ds/step_factor) >= abs(dsmin):
         print 'reducing step to', ds/step_factor
-        ds /= step_factor
+        ds = ds/step_factor
         cstep = cstep-1
       else:
         print 'no convergence using minimum step size'
@@ -121,9 +127,9 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
 
 
 def go():
-  sqrt2 = sqrt(2.0)/2.0
-  p0 = sqrt2
-  x0 = array([sqrt2, sqrt2])
-  nsteps = 10
+  value = sqrt(2.0)/2.0
+  p0 = value
+  x0 = array([value, value])
+  nsteps = 15
   ds = -0.1
   return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds) 
