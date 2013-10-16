@@ -19,14 +19,14 @@ def FindTip(u, v, ut=None, vt=None):
   """ Finds the tip of the spiral as the section of u and v contour
       lines. Contours are given by the thresholds ut, vt. """
 
-  if ut == None:
+  if ut is None:
     ut = (u.max() + u.min())/2.0
 
-  if vt == None:
+  if vt is None:
     vt = (v.max() + v.min())/2.0
 
   if u.shape != v.shape:
-    print 'different shapes of u and v in GetTip'
+    print 'different shapes of u and v in FindTip'
     return
 
   (nx, ny) = u.shape
