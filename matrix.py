@@ -22,9 +22,9 @@ class base_matrix(object):
 # dense matrix class
 #
 
-class dense_matrix(base_matrix):
+class dense_matrix(object):
   def __init__(self, m):
-    base_matrix.__init__(self, m)
+    self.factorized = None
 
     m = array(m)
     self.A     = m
@@ -53,9 +53,10 @@ class dense_matrix(base_matrix):
 # sparse matrix class
 #
 
-class sparse_matrix(base_matrix):
+class sparse_matrix(object):
   def __init__(self, m):
-    base_matrix.__init__(self, m)
+
+    self.factorized = None
 
     m = csc_matrix(m)
     self.A     = m
@@ -63,6 +64,9 @@ class sparse_matrix(base_matrix):
 
 
   def factorize(self):
+    # print 'factorizing sparse matrix'
+    # print self.shape
+
     if self.factorized is not None:
       return self.factorized
 
@@ -79,7 +83,7 @@ class sparse_matrix(base_matrix):
 # augmented matrix class
 #
 
-class augmented_matrix(base_matrix):
+class augmented_matrix(object):
   def __init__(self, A, B, C, D):
     """ builds the matrix in the shape of
 
@@ -90,7 +94,8 @@ class augmented_matrix(base_matrix):
               D         is a scalar, and
               B and C   are of corresponding sizes. """
 
-    base_matrix.__init__(self, A, B, C, D)
+    self.factorized = None
+    # base_matrix.__init__(self, A, B, C, D)
 
     self.A     =       A
     self.B     = array(B)
@@ -103,18 +108,28 @@ class augmented_matrix(base_matrix):
     if self.factorized is not None:
       return self.factorized
 
+    # print 'factorizing augmented_matrix'
+    # print self.shape
+
     A, B, C, D = self.A, self.B, self.C, self.D
     Afacd = A.factorize()
 
     AmB = Afacd(B) # we need a solve here
 
     # Shur complement of A
+    # print self.Aname, self.Bname, self.Cname, self.Dname
+    # print C.shape, AmB.shape
+    # print C, AmB
+
     SC = 1.0/(D - dot(C, AmB))
 
     def factorized(b):
       x = b[:-1]
       y = b[-1:]
       c = zeros_like(b)
+
+      # print 'len(x)', len(x)
+      # print A.shape
 
       AfacdX = Afacd(x)
       CAfacdX = dot(C, AfacdX)

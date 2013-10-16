@@ -5,7 +5,6 @@ from numpy.linalg import solve, norm
 from matrix import dense_matrix, sparse_matrix, augmented_matrix
 # from scipy.linalg import lu_factor, lu_solve
 
-ndim = 2
 tol = 1.0e-8
 ntst = 9
 
@@ -17,28 +16,11 @@ step_factor = 1.5
 
 
 
-def f(u, p):
-  x, y = u[0], u[1]
-  return [x**2 + y**2 - 1.0, x - p]
-
-
-
-def dfdx(u, p):
-  x, y = u[0], u[1]
-  return dense_matrix([[2.0*x, 2.0*y],
-                       [1.0,   0.0]])
-
-
-
-def dfdp(u, p):
-  return [0.0, -1.0]
-
-
-def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
+def continuation(ndim, f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   """
   the main function for performing continuation
 
-  res, predictions = continuation(f, dfdx, dfdp, x0, p0, nsteps, ds),
+  x, p = continuation(f, dfdx, dfdp, x0, p0, nsteps, ds),
   where:
   f    - the nonlinearity
   dfdx - the Jacobian matrix of the system
@@ -66,6 +48,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
       tv[-1] = 1.0
 
     m = build_ext_matrix(dfdx, x, p, tv)
+    # print m.shape
 
     b = zeros(ndim+1)
     b[-1] = 1.0
@@ -77,8 +60,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
   #
   # main entry point here
   # 
-  res         = hstack([x0, p0])
-  predictions = hstack([x0, p0])
+  # res         = hstack([x0, p0])
+  # predictions = hstack([x0, p0])
 
   jac = dfdx(x0, p0)
   tv = compute_tangent_vector(jac, x0, p0)
@@ -93,7 +76,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
 
     x = x0 + xp*ds # prediction
     p = p0 + pp*ds
-    predictions = vstack([predictions, hstack([x, p])])
+    # predictions = vstack([predictions, hstack([x, p])])
 
     nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
     print '   initial norm:', nrm
@@ -116,8 +99,11 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
       nstep += 1
 
     if nrm <= tol: # converged
+      if callback is not None:
+        callback(x, p)
+
       x0, p0 = x, p
-      res = vstack([res, hstack([x, p])])
+      # res = vstack([res, hstack([x, p])])
 
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available
                                                  # and factorized
@@ -135,17 +121,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds):
         cstep = cstep-1
       else:
         print 'no convergence using minimum step size'
-        return res, predictions
+        return x, p
 
 
-  return res, predictions
-
-
-
-def go():
-  value = sqrt(2.0)/2.0
-  p0 = value
-  x0 = array([value, value])
-  nsteps = 15
-  ds = -0.1
-  return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds) 
+  return x, p
