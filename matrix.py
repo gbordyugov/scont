@@ -14,6 +14,7 @@ from scipy.linalg import lu_factor, lu_solve
 class base_matrix(object):
   def __init__(self, *args):
     object.__init__(self)
+    super(base_matrix, self).__init__()
     self.factorized = None
 
 
@@ -22,7 +23,7 @@ class base_matrix(object):
 # dense matrix class
 #
 
-class dense_matrix(object):
+class dense_matrix(base_matrix):
   def __init__(self, m):
     self.factorized = None
 
@@ -53,9 +54,8 @@ class dense_matrix(object):
 # sparse matrix class
 #
 
-class sparse_matrix(object):
+class sparse_matrix(base_matrix):
   def __init__(self, m):
-
     self.factorized = None
 
     m = csc_matrix(m)
@@ -64,9 +64,6 @@ class sparse_matrix(object):
 
 
   def factorize(self):
-    # print 'factorizing sparse matrix'
-    # print self.shape
-
     if self.factorized is not None:
       return self.factorized
 
@@ -83,7 +80,7 @@ class sparse_matrix(object):
 # augmented matrix class
 #
 
-class augmented_matrix(object):
+class augmented_matrix(base_matrix):
   def __init__(self, A, B, C, D):
     """ builds the matrix in the shape of
 
@@ -95,12 +92,18 @@ class augmented_matrix(object):
               B and C   are of corresponding sizes. """
 
     self.factorized = None
-    # base_matrix.__init__(self, A, B, C, D)
 
-    self.A     =       A
-    self.B     = array(B)
-    self.C     = array(C)
-    self.D     =       D
+    self.A = A
+    self.D = D
+
+    self.B           = zeros(A.shape[0])
+    B                = array(B)
+    self.B[0:len(B)] = B[:]
+
+    self.C           = zeros(A.shape[1])
+    C                = array(C)
+    self.C[0:len(C)] = C[:]
+
     self.shape = (A.shape[0]+1, A.shape[1]+1)
 
 
@@ -108,28 +111,18 @@ class augmented_matrix(object):
     if self.factorized is not None:
       return self.factorized
 
-    # print 'factorizing augmented_matrix'
-    # print self.shape
-
     A, B, C, D = self.A, self.B, self.C, self.D
     Afacd = A.factorize()
 
     AmB = Afacd(B) # we need a solve here
 
     # Shur complement of A
-    # print self.Aname, self.Bname, self.Cname, self.Dname
-    # print C.shape, AmB.shape
-    # print C, AmB
-
     SC = 1.0/(D - dot(C, AmB))
 
     def factorized(b):
       x = b[:-1]
       y = b[-1:]
       c = zeros_like(b)
-
-      # print 'len(x)', len(x)
-      # print A.shape
 
       AfacdX = Afacd(x)
       CAfacdX = dot(C, AfacdX)

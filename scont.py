@@ -16,7 +16,7 @@ step_factor = 1.5
 
 
 
-def continuation(ndim, f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
+def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   """
   the main function for performing continuation
 
@@ -27,6 +27,7 @@ def continuation(ndim, f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
          expected to have a ``factorize'' method, returning a function
          that represents the inverse operator
   """
+  ndim = len(f(x0, p0))
 
   # a couple of helper functions
   def compute_ext_rhs(x, p, x0, p0, xp, pp, ds):
