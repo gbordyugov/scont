@@ -64,7 +64,7 @@ def dfdx(u, e):
     dsdr     = dsdr.reshape(s.shape3)
     dsdtheta = dsdtheta.reshape(s.shape3)
 
-    k = 30
+    k = 30000
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
