@@ -1,4 +1,4 @@
-from numpy import zeros, append as npappend, dot
+from numpy import zeros, append as npappend, dot, zeros_like
 
 from scont import continuation
 from sector import sector
@@ -44,14 +44,42 @@ def dfdpar(s, u, e, par, d = 1.0e-3):
 
 
 def dfdx(u, e):
-  ue2sector(s, u, e)
+  def between(i, n):
+    if   i < 0: return 0
+    elif i > n: return n
+    else:       return i
 
+  ue2sector(s, u, e)
   dfdr = dfdpar(s, u, e, 'r')
   dfdo = dfdpar(s, u, e, 'omega')
   
   dsdr     = s.drmatrix()    *s.flat
   dsdtheta = s.dthetamatrix()*s.flat
+
+  # constrain it close to the area around the tip
+  if True:
+    t = tip(s.u, s.v)[0]
+    i, j = int(t[0]), int(t[1])
+
+    dsdr     = dsdr.reshape(s.shape3)
+    dsdtheta = dsdtheta.reshape(s.shape3)
+
+    k = 30
+    mask = zeros_like(dsdr, dtype=bool)
+    nx, ny, nz = mask.shape
+
+    imin, imax = between(i-k, nx), between(i+k, nx)
+    jmin, jmax = between(j-k, ny), between(j+k, ny)
+    
+    mask[imin:imax, jmin:jmax, :] = True
+    mask = ~mask
+
+    dsdr    [mask] = 0.0
+    dsdtheta[mask] = 0.0
   
+  dsdr     = dsdr.reshape(s.shape1)
+  dsdtheta = dsdtheta.reshape(s.shape1)
+
   j = sparse_matrix(s.jacobian())
   j = augmented_matrix(j, dfdr, dsdr,     0.0)
   j = augmented_matrix(j, dfdo, dsdtheta, 0.0)
@@ -64,22 +92,27 @@ def dfdp(u, e):
   return npappend(dfdpar(s, u, e, 'e'), [0.0, 0.0])
 
 
-u = zeros(len(s.flat)+2)
-u[:-2] = s.flat[:]
-u[ -2] = s.r
-u[ -1] = s.omega
-e = s.e
-
 
 def callback(u, e):
   r = u[-2]
   o = u[-1]
   print 'e =', e, ', r =', r, ', omega =', o
 
+  flat = u[:-2].reshape(s.shape3)
+  t = tip(flat[...,0], flat[...,1])[0]
+  print 'tip coordinates:', t[0], t[1]
+
+
+
+u = zeros(len(s.flat)+2)
+u[:-2] = s.flat[:]
+u[ -2] = s.r
+u[ -1] = s.omega
+e = s.e
 
 def go():
   global u, e
-  u, e = continuation(f, dfdx, dfdp, u, e, 10, 5.0, callback) 
+  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 2.0, callback) 
   s.e = e
   s.flat[:] = u[:-2]
   s.r       = u[ -2]

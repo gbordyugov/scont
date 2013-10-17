@@ -5,10 +5,11 @@ from matrix import dense_matrix, sparse_matrix, augmented_matrix,\
 from scipy.sparse import issparse
 
 tol = 1.0e-8
-ntst = 9
+itmx = 9
+nwtn = 4
 
 dsmin = 1.0e-9
-dsmax = 5.0e-1
+dsmax = 5.0e2
 
 # by how much reduce/increase the step size
 step_factor = 1.5
@@ -66,7 +67,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
 
   def build_ext_matrix(dfdx, x, p, tv):
     """ builds the Jacobian matrix of the extended system """
-    if isinstance(dfdx, base_matrix):
+    if   isinstance(dfdx, base_matrix):
       return augmented_matrix(dfdx,                dfdp(x,p), tv[:-1], tv[-1])
     elif isinstance(dfdx, list):
       return augmented_matrix(dense_matrix(dfdx),  dfdp(x,p), tv[:-1], tv[-1])
@@ -119,9 +120,9 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
     print '   initial norm:', nrm
     nstep = 0
 
-    while nrm > tol and nstep < ntst:
-      if nstep > 0:        # otherwise take jac from the computation of
-        jac = dfdx(x, p)   # the tangent vector above
+    while nrm > tol and nstep < itmx:
+      if nstep > 0 and nstep < nwtn: # otherwise take jac from the computation of
+        jac = dfdx(x, p)             # the tangent vector above
 
       # perform a solve of the Newton's method
       m = build_ext_matrix(jac, x, p, tv)
@@ -145,7 +146,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       xp = tv[:-1]
       pp = tv[ -1]
 
-      if nstep <= ntst/2 and abs(ds*step_factor) < abs(dsmax):
+      if nstep <= itmx/3 and abs(ds*step_factor) < abs(dsmax):
         print 'increasing step to', ds*step_factor
         ds = ds*step_factor
       
@@ -157,6 +158,5 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       else:
         print 'no convergence using minimum step size'
         return x, p
-
 
   return x, p
