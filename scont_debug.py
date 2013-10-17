@@ -1,6 +1,4 @@
 from numpy import array, sqrt
-from matrix import dense_matrix, sparse_matrix, augmented_matrix
-
 from scont import continuation
 
 
@@ -12,13 +10,18 @@ def f(u, p):
 
 def dfdx(u, p):
   x, y = u[0], u[1]
-  return sparse_matrix([[2.0*x, 2.0*y],
-                       [1.0,   0.0]])
+  return ([[2.0*x, 2.0*y],
+           [1.0,   0.0]])
 
 
 
 def dfdp(u, p):
   return [0.0, -1.0]
+
+
+def callback(u, p):
+  x, y = u[0], u[1]
+  print 'x =', x, ' y =', y, ' p =', p
 
 
 def go():
@@ -27,4 +30,4 @@ def go():
   x0 = [value, value]
   nsteps = 15
   ds = -0.1
-  return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds) 
+  return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback) 

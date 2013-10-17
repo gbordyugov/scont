@@ -12,10 +12,11 @@ from scipy.linalg import lu_factor, lu_solve
 #
 
 class base_matrix(object):
-  def __init__(self, *args):
-    object.__init__(self)
-    super(base_matrix, self).__init__()
-    self.factorized = None
+  pass
+  ## def __init__(self, *args):
+  ##   object.__init__(self)
+  ##   super(base_matrix, self).__init__()
+  ##   self.factorized = None
 
 
 

@@ -1,9 +1,10 @@
 from numpy import array, zeros, sqrt, hstack, vstack, newaxis, dot,\
-                  zeros_like
+                  zeros_like, ndarray
 from numpy.random import rand
 from numpy.linalg import solve, norm
-from matrix import dense_matrix, sparse_matrix, augmented_matrix
-# from scipy.linalg import lu_factor, lu_solve
+from matrix import dense_matrix, sparse_matrix, augmented_matrix,\
+                   base_matrix
+from scipy.sparse import issparse
 
 tol = 1.0e-8
 ntst = 9
@@ -20,14 +21,44 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   """
   the main function for performing continuation
 
-  x, p = continuation(f, dfdx, dfdp, x0, p0, nsteps, ds),
-  where:
-  f    - the nonlinearity
-  dfdx - the Jacobian matrix of the system
-         expected to have a ``factorize'' method, returning a function
-         that represents the inverse operator
+  f        : the nonlinearity
+  dfdx     : the Jacobian matrix of the system, can be either:
+              - a dense matrix, i.e. numpy.array object
+              - a sparse matrix
+              - a matrix.base_matrix or its subclasses object
+  dfdp     : the derivative of f with respect to p
+  x0       : initial solution
+  p0       : initial value of parameter
+  nstesp   : number of continuation steps to be taken
+  ds       : initial step length
+  callback : a function that will be called as callback(x, p)
+             upon each successful continuation step
   """
-  ndim = len(f(x0, p0))
+
+  # first perform some tests
+  if len(x0) != len(f(x0, p0)):
+    print 'mismatch of x and f(x, p) dimensions, exiting'
+    exit(-1)
+
+  if len(x0) != len(dfdp(x0, p0)):
+    print 'mismatch of x and dfdp(x, p) dimensions, exiting'
+    exit(-1)
+
+
+  j = dfdx(x0, p0)
+  if isinstance(j, list):
+    j = array(j)
+
+  shape = j.shape
+  if shape[0] != shape[1]:
+    print 'dfdx(x0, p) is not a square matrix, exiting'
+    exit(-1)
+
+  if shape[0] != len(x0):
+    print 'dimension of dfdx(x, p) does not match dimension of x, exiting'
+    exit(-1)
+
+  ndim = len(x0)
 
   # a couple of helper functions
   def compute_ext_rhs(x, p, x0, p0, xp, pp, ds):
@@ -37,7 +68,17 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
 
   def build_ext_matrix(dfdx, x, p, tv):
     """ builds the Jacobian matrix of the extended system """
-    return augmented_matrix(dfdx, dfdp(x,p), tv[:-1], tv[-1])
+    if isinstance(dfdx, base_matrix):
+      return augmented_matrix(dfdx,                dfdp(x,p), tv[:-1], tv[-1])
+    elif isinstance(dfdx, list):
+      return augmented_matrix(dense_matrix(dfdx),  dfdp(x,p), tv[:-1], tv[-1])
+    elif isinstance(dfdx, ndarray):
+      return augmented_matrix(dense_matrix(dfdx),  dfdp(x,p), tv[:-1], tv[-1])
+    elif issparse(dfdx):
+      return augmented_matrix(sparse_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
+    else:
+      print 'unknown type of Jacobian matrix, exiting'
+      exit(-1)
 
 
   def compute_tangent_vector(dfdx, x, p, old=None):
