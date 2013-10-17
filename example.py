@@ -1,5 +1,5 @@
 from numpy import array, sqrt
-from scont import continuation
+from continuation import continuation
 
 
 def f(u, p):

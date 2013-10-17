@@ -1,6 +1,6 @@
 from numpy import zeros, append as npappend, dot, zeros_like
 
-from scont import continuation
+from continuation import continuation
 from sector import sector
 from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
