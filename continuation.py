@@ -121,7 +121,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
     nstep = 0
 
     while nrm > tol and nstep < itmx:
-      if nstep > 0 and nstep < nwtn: # otherwise take jac from the computation of
+      if nstep > 0: # and nstep < nwtn: # otherwise take jac from the computation of
         jac = dfdx(x, p)             # the tangent vector above
 
       # perform a solve of the Newton's method
