@@ -19,9 +19,12 @@ def dfdp(u, p):
   return [0.0, -1.0]
 
 
+solution = [] # here, we are going to collect our solution
+
 def callback(u, p):
   x, y = u[0], u[1]
   print 'x =', x, ' y =', y, ' p =', p
+  solution.append([x, y, p])
 
 
 def go():
@@ -30,4 +33,8 @@ def go():
   x0 = [value, value]
   nsteps = 15
   ds = -0.1
-  return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback) 
+  return continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback)
+
+go()
+solution = array(solution)
+print "issue plot(solution[:,0], solution[:,1], 'o') to plot the solution"
