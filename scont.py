@@ -1,7 +1,5 @@
-from numpy import array, zeros, sqrt, hstack, vstack, newaxis, dot,\
-                  zeros_like, ndarray
-from numpy.random import rand
-from numpy.linalg import solve, norm
+from numpy import array, zeros, hstack, dot, zeros_like, ndarray
+from numpy.linalg import norm
 from matrix import dense_matrix, sparse_matrix, augmented_matrix,\
                    base_matrix
 from scipy.sparse import issparse
@@ -102,8 +100,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   #
   # main entry point here
   # 
-  # res         = hstack([x0, p0])
-  # predictions = hstack([x0, p0])
 
   jac = dfdx(x0, p0)
   tv = compute_tangent_vector(jac, x0, p0)
@@ -118,7 +114,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
 
     x = x0 + xp*ds # prediction
     p = p0 + pp*ds
-    # predictions = vstack([predictions, hstack([x, p])])
 
     nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
     print '   initial norm:', nrm
@@ -145,8 +140,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
         callback(x, p)
 
       x0, p0 = x, p
-      # res = vstack([res, hstack([x, p])])
-
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available
                                                  # and factorized
       xp = tv[:-1]
