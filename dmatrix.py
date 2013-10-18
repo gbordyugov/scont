@@ -1,4 +1,4 @@
-from numpy import diag, ones, zeros, array
+from numpy import diag, ones, zeros, array, arange
 from scipy.sparse import lil_matrix
 
 def weights(z, x):# , n, m):
@@ -44,7 +44,35 @@ def weights(z, x):# , n, m):
   return array(zip(*c))
 
 
-def DMatrixFourthOrder(n, l, perbc):
+def dmatrix(n, length, order, nsp, perbc=False):
+  """
+  returns a 1D finite-difference derivative matrix
+  Parameters:
+  n      : number of points
+  length : length of the domain
+  order  : order of the derivative
+  nsp    : number of stencil points, must be odd
+  p      : periodic boundary condition (False, i.e. no-flux by default)
+  """
+  wing = (nsp-1)/2 # nr. of stencil points at one side of the middle one
+  imin = 0 + wing
+  imax = n - wing
+
+  # first, fill the bulk of the matrix
+  x = arange(nsp, dtype=float) - (nsp-1)/2
+  coefs = weights(0.0, x)[order]
+
+  rel_ind = array(x, dtype=int)
+  window_width = imax - imin
+  window = zeros((window_width, window_width))
+  for (c, i) in zip(coefs, rel_ind):
+    window += c*diag(ones(window-abs(i)), i)
+
+  print window
+  pass
+
+
+def DMatrixFourthOrder(n, length, perbc):
   ## 1/12, -2/3, 0, 2/3, -1/12
   C = [1.0/12.0, -2.0/3.0, 0.0, 2.0/3.0, -1.0/12.0]
   a = 2.0/3.0
@@ -65,11 +93,11 @@ def DMatrixFourthOrder(n, l, perbc):
 
     n = n - 1
 
-  odx = 1.0/(float(l)/float(n))
+  odx = 1.0/(float(length)/float(n))
   return lil_matrix(m*odx)
 
 
-def DDMatrixFourthOrder(n, l, perbc):
+def DDMatrixFourthOrder(n, length, perbc):
   ## -1/12, 4/3, -5/2, 4/3, -1/12
   a = 1.0/12.0
   b = 4.0/3.0
@@ -96,11 +124,11 @@ def DDMatrixFourthOrder(n, l, perbc):
     m[-1,-2], m[-1,-1] =  2.0,-2.0
     n = n - 1
 
-  odx2 = 1.0/(float(l)/float(n))**2
+  odx2 = 1.0/(float(length)/float(n))**2
   return lil_matrix(m*odx2)
 
 
-def DMatrixSecondOrder(n, l, perbc=False):
+def DMatrixSecondOrder(n, length, perbc=False):
   m = diag(ones(n-1), 1) - diag(ones(n-1), -1)
 
   if perbc:
@@ -109,11 +137,11 @@ def DMatrixSecondOrder(n, l, perbc=False):
     m[0,1], m[-1,-2] = 0.0, 0.0
     n = n - 1
 
-  odx = 1.0/(2.0*float(l)/float(n))
+  odx = 1.0/(2.0*float(length)/float(n))
   return lil_matrix(m*odx)
 
 
-def DDMatrixSecondOrder(n, l, perbc=False):
+def DDMatrixSecondOrder(n, length, perbc=False):
   m = diag(ones(n-1), 1) - 2.0*diag(ones(n), 0) + diag(ones(n-1), -1)
 
   if perbc:
@@ -122,7 +150,7 @@ def DDMatrixSecondOrder(n, l, perbc=False):
     m[0,1], m[-1,-2] = 2.0, 2.0
     n = n - 1
 
-  odx2 = 1.0/(float(l)/float(n))**2
+  odx2 = 1.0/(float(length)/float(n))**2
   return lil_matrix(m*odx2)
 
 
