@@ -53,7 +53,7 @@ def dmatrix(n, length, order, nsp):
   order  : order of the derivative
   nsp    : number of stencil points, must be odd
   """
-  m = zeros((n, n), dtype=float)
+  m = zeros((n, n))
 
   # first, fill the bulk of the matrix...
   x = arange(nsp, dtype=float) - (nsp-1)/2

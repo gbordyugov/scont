@@ -64,7 +64,7 @@ def dfdx(u, e):
     dsdr     = dsdr.reshape(s.shape3)
     dsdtheta = dsdtheta.reshape(s.shape3)
 
-    k = 30000
+    k = 20
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
@@ -92,11 +92,14 @@ def dfdp(u, e):
   return npappend(dfdpar(s, u, e, 'e'), [0.0, 0.0])
 
 
+solution = []
 
 def callback(u, e):
   r = u[-2]
   o = u[-1]
   print 'e =', e, ', r =', r, ', omega =', o
+
+  solution.append([e, r, o])
 
   flat = u[:-2].reshape(s.shape3)
   t = tip(flat[...,0], flat[...,1])[0]
@@ -112,7 +115,7 @@ e = s.e
 
 def go():
   global u, e
-  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 2.0, callback) 
+  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 1.0, callback) 
   s.e = e
   s.flat[:] = u[:-2]
   s.r       = u[ -2]
