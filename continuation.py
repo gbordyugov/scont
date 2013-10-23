@@ -11,6 +11,8 @@ nwtn = 4
 dsmin = 1.0e-9
 dsmax = 5.0e2
 
+norm_explosion = 1.0e3
+
 # by how much reduce/increase the step size
 step_factor = 1.5
 
@@ -120,7 +122,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
     print '   initial norm:', nrm
     nstep = 0
 
-    while nrm > tol and nstep < itmx:
+    while nrm > tol and nrm < norm_explosion and nstep < itmx:
       if nstep > 0: # and nstep < nwtn: # otherwise take jac from the computation of
         jac = dfdx(x, p)             # the tangent vector above
 
