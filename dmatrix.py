@@ -81,7 +81,7 @@ nsp = 9
 
 def dm(n, length, perbc=False, nsp=nsp):
   m = dmatrix(n, length, 1, nsp)
-  odx = 1.0/(2.0*float(length)/float(n))
+  odx = 1.0/(float(length)/float(n))
   return lil_matrix(m*odx)
 
 
