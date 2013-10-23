@@ -6,7 +6,12 @@ from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 
-s = sector.load('sectors/150.sector')
+# the old version
+# s = sector.load('sectors/150.sector')
+
+# the new versions
+# s = sector.load('sectors/150.sector.new')
+s = sector.load('sectors/150.nsector')
 
 
 def ue2sector(s, u, e):
@@ -26,18 +31,19 @@ def f(u, e):
 
 
 
-def dfdpar(s, u, e, par, d = 1.0e-3):
+
+def dfdpar(s, u, e, parname, d = 1.0e-6):
   ue2sector(s, u, e)
 
   dic = s.__dict__
 
-  dic[par] += d/2.0
+  dic[parname] += d/2.0
   rhs2 = s.rhs()
 
-  dic[par] -= d
+  dic[parname] -= d
   rhs1 = s.rhs()
 
-  dic[par] += d/2.0
+  dic[parname] += d/2.0
 
   return (rhs2 - rhs1)/d
 
@@ -57,14 +63,14 @@ def dfdx(u, e):
   dsdtheta = s.dthetamatrix()*s.flat
 
   # constrain it close to the area around the tip
-  if True:
+  if False:
     t = tip(s.u, s.v)[0]
     i, j = int(t[0]), int(t[1])
 
-    dsdr     = dsdr.reshape(s.shape3)
+    dsdr     =     dsdr.reshape(s.shape3)
     dsdtheta = dsdtheta.reshape(s.shape3)
 
-    k = 20
+    k = 3000
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
@@ -77,8 +83,8 @@ def dfdx(u, e):
     dsdr    [mask] = 0.0
     dsdtheta[mask] = 0.0
   
-  dsdr     = dsdr.reshape(s.shape1)
-  dsdtheta = dsdtheta.reshape(s.shape1)
+    dsdr     = dsdr.reshape(s.shape1)
+    dsdtheta = dsdtheta.reshape(s.shape1)
 
   j = sparse_matrix(s.jacobian())
   j = augmented_matrix(j, dfdr, dsdr,     0.0)
@@ -92,6 +98,10 @@ def dfdp(u, e):
   return npappend(dfdpar(s, u, e, 'e'), [0.0, 0.0])
 
 
+fname = 'fort.7'
+fort7 = open(fname, 'w')
+fort7.close()
+
 solution = []
 
 def callback(u, e):
@@ -100,6 +110,10 @@ def callback(u, e):
   print 'e =', e, ', r =', r, ', omega =', o
 
   solution.append([e, r, o])
+
+  f = open(fname, 'a')
+  f.write(' '.join(map(str, [e, r, o]))+'\n')
+  f.close()
 
   flat = u[:-2].reshape(s.shape3)
   t = tip(flat[...,0], flat[...,1])[0]
@@ -117,8 +131,5 @@ e = s.e
 
 def go():
   global u, e
-  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 1.0, callback) 
-  s.e = e
-  s.flat[:] = u[:-2]
-  s.r       = u[ -2]
-  s.omega   = u[ -1]
+  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 10.0, callback) 
+  ue2sector(s, u, e)

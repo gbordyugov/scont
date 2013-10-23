@@ -2,7 +2,7 @@ from sector import sector
 from fhn import FHNNonlinearity, FHNJacobian
 
 consts = {'nr'     : 225,     # those ones are to be matched to those
-          'ntheta' : 150,     # 'sectors/150.sector'
+          'ntheta' : 150,     # of the file 'sectors/150.sector'
           'nv'     : 2}
 
 pars = {'r'      : 150.0,              # inner radius of the ring
@@ -19,6 +19,11 @@ pars = {'r'      : 150.0,              # inner radius of the ring
 
 from numpy import loadtxt
 pars.update(consts)
+
+# a small hack - I don't use 'theta' anymore, preferring 'arclength'
+pars['arclength'] = pars['r']*pars['theta']
+del pars['theta']
+
 s = sector(pars)
 s.flat[:] = loadtxt('/home/bordyugov/src/finger/sctrs/150.dat')
 

@@ -31,10 +31,18 @@ class sector(pickable):
   def shape3(self): return (self.nr, self.ntheta, self.nv)
   @property
   def aspect(self): return float(self.ntheta)/float(self.nr)
+
+  # radii
   @property
   def     r1(self): return self.r           # smaller radius
   @property
   def     r2(self): return self.r + self.R  # larger  radius
+
+  # angle
+  @property
+  def  theta(self):  return  self.arclength/self.r
+
+  # deltas
   @property
   def     dr(self): return self.R    /float(self.nr     - 1)
   @property
@@ -50,12 +58,6 @@ class sector(pickable):
   def      u(self): return self.data[...,0]
   @property
   def      v(self): return self.data[...,1]
-
-
-  def setr(self, r):
-    arclength = self.r*self.theta
-    self.r = r
-    self.theta = arclength/self.r
 
 
   def drmatrix(self):
