@@ -105,6 +105,8 @@ def callback(u, e):
   t = tip(flat[...,0], flat[...,1])[0]
   print 'tip coordinates:', t[0], t[1]
 
+  return 0 # continue continuation
+
 
 
 u = zeros(len(s.flat)+2)

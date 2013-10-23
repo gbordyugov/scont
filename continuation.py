@@ -138,7 +138,9 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
 
     if nrm <= tol: # converged
       if callback is not None:
-        callback(x, p)
+        result = callback(x, p)
+        if result != 0:
+          return x, p
 
       x0, p0 = x, p
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available

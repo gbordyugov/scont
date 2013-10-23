@@ -26,6 +26,8 @@ def callback(u, p):
   print 'x =', x, ' y =', y, ' p =', p
   solution.append([x, y, p])
 
+  return 0 # continue continuation
+
 
 def go():
   value = sqrt(2.0)/2.0
