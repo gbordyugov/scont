@@ -52,6 +52,12 @@ class sector(pickable):
   def      v(self): return self.data[...,1]
 
 
+  def setr(self, r):
+    arclength = self.r*self.theta
+    self.r = r
+    self.theta = arclength/self.r
+
+
   def drmatrix(self):
     dr = DMatrix(self.nr, self.R, False)
     return spkron(spkron(dr, eye(self.ntheta)), eye(self.nv))
@@ -68,13 +74,15 @@ class sector(pickable):
     drr = DDMatrix(self.nr,     self.R,     False)
     dtt = DDMatrix(self.ntheta, self.theta, False)
 
-    r = linspace(self.r1, self.r2, self.nr, endpoint=True)
+    radii = linspace(self.r1, self.r2, self.nr, endpoint=True)
 
     # one over r factor in front of the first radial derivative
     dr = dr.todense()
-    for (row, rad) in zip(dr, r):
-      row /= rad
+    for (row, r) in zip(dr, radii):
+      row /= r
     dr = lil_matrix(dr)
+
+    r = radii
 
     l1 = spkron(drr, eye(self.ntheta))
     l2 = spkron(dr,  eye(self.ntheta))
