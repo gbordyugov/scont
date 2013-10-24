@@ -6,12 +6,7 @@ from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 
-# the old version
-# s = sector.load('sectors/150.sector')
-
-# the new versions
-# s = sector.load('sectors/150.sector.new')
-s = sector.load('sectors/150.nsector')
+s = sector.load('sectors/150.sector')
 
 
 def ue2sector(s, u, e):
@@ -50,11 +45,6 @@ def dfdpar(s, u, e, parname, d = 1.0e-6):
 
 
 def dfdx(u, e):
-  def between(i, n):
-    if   i < 0: return 0
-    elif i > n: return n
-    else:       return i
-
   ue2sector(s, u, e)
   dfdr = dfdpar(s, u, e, 'r')
   dfdo = dfdpar(s, u, e, 'omega')
@@ -63,19 +53,19 @@ def dfdx(u, e):
   dsdtheta = s.dthetamatrix()*s.flat
 
   # constrain it close to the area around the tip
-  if False:
+  if True:
     t = tip(s.u, s.v)[0]
     i, j = int(t[0]), int(t[1])
 
     dsdr     =     dsdr.reshape(s.shape3)
     dsdtheta = dsdtheta.reshape(s.shape3)
 
-    k = 3000
+    k = 20
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
-    imin, imax = between(i-k, nx), between(i+k, nx)
-    jmin, jmax = between(j-k, ny), between(j+k, ny)
+    imin, imax = max(i-k, nx), min(i+k, nx)
+    jmin, jmax = max(j-k, ny), min(j+k, ny)
     
     mask[imin:imax, jmin:jmax, :] = True
     mask = ~mask
@@ -131,5 +121,5 @@ e = s.e
 
 def go():
   global u, e
-  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 10.0, callback) 
+  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 5.0, callback) 
   ue2sector(s, u, e)
