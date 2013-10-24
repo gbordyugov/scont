@@ -88,7 +88,7 @@ def dfdp(u, e):
   return npappend(dfdpar(s, u, e, 'e'), [0.0, 0.0])
 
 
-fname = 'fort.7'
+fname = 'sector.fort.7'
 fort7 = open(fname, 'w')
 fort7.close()
 
@@ -101,9 +101,9 @@ def callback(u, e):
 
   solution.append([e, r, o])
 
-  f = open(fname, 'a')
-  f.write(' '.join(map(str, [e, r, o]))+'\n')
-  f.close()
+  fort7 = open(fname, 'a')
+  fort7.write(' '.join(map(str, [e, r, o]))+'\n')
+  fort7.close()
 
   flat = u[:-2].reshape(s.shape3)
   t = tip(flat[...,0], flat[...,1])[0]
