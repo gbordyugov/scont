@@ -19,11 +19,7 @@ def ue2sector(s, u, e):
 
 def f(u, e):
   ue2sector(s, u, e)
-  dsdr     = s.drmatrix()    *s.flat
-  dsdtheta = s.dthetamatrix()*s.flat
-
   return npappend(s.rhs(), [0.0, 0.0])
-
 
 
 
