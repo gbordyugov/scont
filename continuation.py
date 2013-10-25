@@ -11,7 +11,7 @@ itmx = 9
 nwtn = 4
 
 dsmin = 1.0e-9
-dsmax = 5.0e2
+dsmax = 5.0e4
 
 norm_explosion = 1.0e3
 
@@ -158,8 +158,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       
     else: # not yet converged
       if abs(ds/step_factor) >= abs(dsmin):
-        print 'reducing step to', ds/step_factor
-        ds = ds/step_factor
+        print 'reducing step to', ds/step_factor/10.0
+        ds = ds/step_factor/10.0
         cstep = cstep-1
       else:
         print 'no convergence using minimum step size'
