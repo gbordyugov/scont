@@ -14,6 +14,8 @@ from pickable import pickable
 from dmatrix import DMatrix, DDMatrix
 
 class finger(pickable):
+  parnames = ['nx', 'ny', 'nv', 'vx', 'vy', 'lx', 'ly', 'a', 'b', 'e', 'f',
+              'jac', 'D']
   def __init__(self, pars):
     self.__dict__.update(pars)
 
@@ -48,6 +50,13 @@ class finger(pickable):
   def      u(self): return self.data[...,0]
   @property
   def      v(self): return self.data[...,1]
+
+  @property
+  def   pars(self):
+    d = dict()
+    for p in self.parnames:
+      d[p] = self.__dict__[p]
+    return d
 
 
   def dxmatrix(self):
