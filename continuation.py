@@ -4,6 +4,8 @@ from matrix import dense_matrix, sparse_matrix, augmented_matrix,\
                    base_matrix
 from scipy.sparse import issparse
 
+from sys import exit
+
 tol = 1.0e-8
 itmx = 9
 nwtn = 4
