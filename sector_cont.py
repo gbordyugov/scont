@@ -60,8 +60,8 @@ def dfdx(u, e):
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
-    imin, imax = max(i-k, nx), min(i+k, nx)
-    jmin, jmax = max(j-k, ny), min(j+k, ny)
+    imin, imax = max(i-k, 0), min(i+k, nx)
+    jmin, jmax = max(j-k, 0), min(j+k, ny)
     
     mask[imin:imax, jmin:jmax, :] = True
     mask = ~mask

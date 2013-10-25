@@ -1,4 +1,5 @@
 from numpy import zeros, append as npappend, dot, zeros_like
+from numpy.linalg import norm
 
 from continuation import continuation
 from finger import finger
@@ -9,7 +10,8 @@ from tip import FindTip as tip
 
 f = finger.load('fingers/critical.finger')
 
-r = 1.0e3
+r = 1.0e6
+
 pars = {'nr'        : f.nx,
         'ntheta'    : f.ny,
         'nv'        : f.nv,
@@ -79,8 +81,8 @@ def dfdx(u, e):
     mask = zeros_like(dsdr, dtype=bool)
     nx, ny, nz = mask.shape
 
-    imin, imax = max(i-k, nx), min(i+k, nx)
-    jmin, jmax = max(j-k, ny), min(j+k, ny)
+    imin, imax = max(i-k, 0), min(i+k, nx)
+    jmin, jmax = max(j-k, 0), min(j+k, ny)
     
     mask[imin:imax, jmin:jmax, :] = True
     mask = ~mask
@@ -136,5 +138,5 @@ e = s.e
 
 def go():
   global u, e
-  u, e = continuation(f, dfdx, dfdp, u, e, 1000, 10.0, callback) 
+  u, e = continuation(f, dfdx, dfdp, u, e, 1000, -1000.0, callback) 
   ue2sector(s, u, e)
