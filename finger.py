@@ -12,6 +12,7 @@ from numpy.linalg import norm
 
 from pickable import pickable
 from dmatrix import DMatrix, DDMatrix
+from dview import dview
 
 class finger(pickable):
   parnames = ['nx', 'ny', 'nv', 'vx', 'vy', 'lx', 'ly', 'a', 'b', 'e', 'f',
@@ -52,12 +53,7 @@ class finger(pickable):
   def      v(self): return self.data[...,1]
 
   @property
-  def   pars(self):
-    d = dict()
-    for p in self.parnames:
-      d[p] = self.__dict__[p]
-    return d
-
+  def   pars(self): return dview(self.__dict__, self.parnames)
 
   def dxmatrix(self):
     dx = DMatrix(self.nx, self.lx, False)

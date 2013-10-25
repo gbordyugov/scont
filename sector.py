@@ -12,6 +12,7 @@ from numpy.linalg import norm
 
 from pickable import pickable
 from dmatrix import DMatrix, DDMatrix
+from dview import dview
 
 class sector(pickable):
   parnames = ['nr', 'ntheta', 'nv', 'r', 'R', 'omega', 'arclength', 'a', 'b', 'e', 'f',
@@ -62,11 +63,7 @@ class sector(pickable):
   def      v(self): return self.data[...,1]
 
   @property
-  def   pars(self):
-    d = dict()
-    for p in self.parnames:
-      d[p] = self.__dict__[p]
-    return d
+  def   pars(self): return dview(self.__dict__, self.parnames)
 
 
 
