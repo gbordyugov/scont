@@ -158,8 +158,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       
     else: # not yet converged
       if abs(ds/step_factor) >= abs(dsmin):
-        print 'reducing step to', ds/step_factor/10.0
-        ds = ds/step_factor/10.0
+        print 'reducing step to', ds/step_factor/5.0
+        ds = ds/step_factor/5.0
         cstep = cstep-1
       else:
         print 'no convergence using minimum step size'
