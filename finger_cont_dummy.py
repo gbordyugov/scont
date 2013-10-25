@@ -6,7 +6,10 @@ from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 
-f = finger.load('fingers/start.finger')
+ic_fname = 'fingers/start.finger'
+fc_fname = 'fingers/start.finger.11'
+
+f = finger.load(ic_fname)
 f.e = 0.3
 
 
@@ -98,3 +101,4 @@ def go():
   global u, dummy
   u, dummy = continuation(rhs, dfdx, dfdp, u, dummy, 3, -2.5, callback) 
   ue2finger(f, u, dummy)
+  f.save(fc_fname)
