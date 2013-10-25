@@ -3,6 +3,7 @@
 # extended by a column, a row and a number in the lower right corner
 
 from numpy import dot, zeros_like, zeros, array
+from numpy.linalg import norm
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import factorized
 from scipy.linalg import lu_factor, lu_solve
@@ -99,10 +100,18 @@ class augmented_matrix(base_matrix):
 
     self.B           = zeros(A.shape[0])
     B                = array(B)
+
+    if norm(B) == 0.0:
+      print 'Warning: norm(B)=0'
+
     self.B[0:len(B)] = B[:]
 
     self.C           = zeros(A.shape[1])
     C                = array(C)
+
+    if norm(C) == 0.0:
+      print 'Warning: norm(C)=0'
+
     self.C[0:len(C)] = C[:]
 
     self.shape = (A.shape[0]+1, A.shape[1]+1)
