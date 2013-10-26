@@ -2,11 +2,10 @@ from numpy import loadtxt
 from finger import finger
 from fhn import FHNNonlinearity, FHNJacobian
 
-consts = {'nx' : 225,     # those ones are to be matched to those
-          'ny' : 150,     # of the file 'fingers/25500.dat'
-          'nv' : 2}
-
-pars = {'lx'     : 75.0,              # x length
+pars = {'nx'     : 225,     # those ones are to be matched to those
+        'ny'     : 150,     # of the file 'fingers/25500.dat'
+        'nv'     : 2,
+        'lx'     : 75.0,              # x length
         'ly'     : 58.17764173314432, # y length
         'vx'     : 0.0,               # x velocity
         'vy'     : 1.450126183373418, # y velocity
@@ -19,7 +18,6 @@ pars = {'lx'     : 75.0,              # x length
                     [0.0, 0.0]]}
 
 
-pars.update(consts)
 f = finger(pars)
 f.flat[:] = loadtxt('fingers/25500.dat')
 

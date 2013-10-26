@@ -1,11 +1,10 @@
 from sector import sector
 from fhn import FHNNonlinearity, FHNJacobian
 
-consts = {'nr'     : 225,     # those ones are to be matched to those
-          'ntheta' : 150,     # of the file 'sectors/150.sector'
-          'nv'     : 2}
-
-pars = {'r'      : 150.0,              # inner radius of the ring
+pars = {'nr'     : 225,     # those ones are to be matched to those
+        'ntheta' : 150,     # of the file 'sectors/150.sector'
+        'nv'     : 2,
+        'r'      : 150.0,              # inner radius of the ring
         'R'      : 75.0,               # thickness of the ring
         'theta'  : 0.3878509448876288, # opening angle of the sector
         'omega'  : 0.0079106968529917675,
@@ -18,7 +17,6 @@ pars = {'r'      : 150.0,              # inner radius of the ring
                     [0.0, 0.0]]}
 
 from numpy import loadtxt
-pars.update(consts)
 
 # a small hack - I don't use 'theta' anymore, preferring 'arclength'
 pars['arclength'] = pars['r']*pars['theta']
