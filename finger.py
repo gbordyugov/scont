@@ -15,8 +15,8 @@ from dmatrix import DMatrix, DDMatrix
 from dview import dview
 
 class finger(pickable):
-  parnames = ['nx', 'ny', 'nv', 'vx', 'vy', 'lx', 'ly', 'a', 'b', 'e', 'f',
-              'jac', 'D']
+  parnames = ['nx', 'ny', 'nv', 'nsp', 'vx', 'vy', 'lx', 'ly',
+              'a', 'b', 'e', 'f', 'jac', 'D']
   def __init__(self, pars):
     self.__dict__.update(pars)
 
@@ -56,19 +56,19 @@ class finger(pickable):
   def   pars(self): return dview(self.__dict__, self.parnames)
 
   def dxmatrix(self):
-    dx = DMatrix(self.nx, self.lx, False)
+    dx = DMatrix(self.nx, self.lx, False, self.nsp)
     return spkron(spkron(dx, eye(self.ny)), eye(self.nv))
 
 
   def dymatrix(self):
-    dy = DMatrix(self.ny, self.ly, False)
+    dy = DMatrix(self.ny, self.ly, False, self.nsp)
     return spkron(spkron(eye(self.nx), dy), eye(self.nv))
 
 
   def lapmatrix(self):
     """ computes and returns the laplacian matrix """
-    dxx = DDMatrix(self.nx, self.lx, False)
-    dyy = DDMatrix(self.ny, self.ly, False)
+    dxx = DDMatrix(self.nx, self.lx, False, self.nsp)
+    dyy = DDMatrix(self.ny, self.ly, False, self.nsp)
 
     lapx = spkron(dxx, eye(self.ny))
     lapy = spkron(eye(self.nx), dyy)

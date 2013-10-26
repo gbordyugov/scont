@@ -5,6 +5,7 @@ from fhn import FHNNonlinearity, FHNJacobian
 pars = {'nx'     : 225,     # those ones are to be matched to those
         'ny'     : 150,     # of the file 'fingers/25500.dat'
         'nv'     : 2,
+        'nsp'    : 9,
         'lx'     : 75.0,              # x length
         'ly'     : 58.17764173314432, # y length
         'vx'     : 0.0,               # x velocity

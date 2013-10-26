@@ -11,6 +11,7 @@ fc_fname = 'fingers/start.finger.11'
 
 f = finger.load(ic_fname)
 f.e = 0.3
+f.nsp = 11
 
 
 def ue2finger(f, u, dummy):

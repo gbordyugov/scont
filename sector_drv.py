@@ -4,6 +4,7 @@ from fhn import FHNNonlinearity, FHNJacobian
 pars = {'nr'     : 225,     # those ones are to be matched to those
         'ntheta' : 150,     # of the file 'sectors/150.sector'
         'nv'     : 2,
+        'nsp'    : 9,
         'r'      : 150.0,              # inner radius of the ring
         'R'      : 75.0,               # thickness of the ring
         'theta'  : 0.3878509448876288, # opening angle of the sector

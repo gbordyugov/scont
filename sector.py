@@ -15,8 +15,8 @@ from dmatrix import DMatrix, DDMatrix
 from dview import dview
 
 class sector(pickable):
-  parnames = ['nr', 'ntheta', 'nv', 'r', 'R', 'omega', 'arclength', 'a', 'b', 'e', 'f',
-              'jac', 'D']
+  parnames = ['nr', 'ntheta', 'nv', 'nsp', 'r', 'R', 'omega', 'arclength',
+              'a', 'b', 'e', 'f', 'jac', 'D']
   def __init__(self, pars):
     self.__dict__.update(pars)
 
@@ -68,20 +68,20 @@ class sector(pickable):
 
 
   def drmatrix(self):
-    dr = DMatrix(self.nr, self.R, False)
+    dr = DMatrix(self.nr, self.R, False, self.nsp)
     return spkron(spkron(dr, eye(self.ntheta)), eye(self.nv))
 
 
   def dthetamatrix(self):
-    dt = DMatrix(self.ntheta, self.theta, False)
+    dt = DMatrix(self.ntheta, self.theta, False, self.nsp)
     return spkron(spkron(eye(self.nr), dt), eye(self.nv))
 
 
   def lapmatrix(self):
     """ computes and returns the laplacian matrix """
-    dr  =  DMatrix(self.nr,     self.R,     False)
-    drr = DDMatrix(self.nr,     self.R,     False)
-    dtt = DDMatrix(self.ntheta, self.theta, False)
+    dr  =  DMatrix(self.nr,     self.R,     False, self.nsp)
+    drr = DDMatrix(self.nr,     self.R,     False, self.nsp)
+    dtt = DDMatrix(self.ntheta, self.theta, False, self.nsp)
 
     radii = linspace(self.r1, self.r2, self.nr, endpoint=True)
 

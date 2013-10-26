@@ -23,6 +23,7 @@ print f.pars
 pars = {'nr'        : f.nx,
         'ntheta'    : f.ny,
         'nv'        : f.nv,
+        'nsp'       : f.nsp,
         'r'         : r,
         'R'         : f.lx,
         'arclength' : f.ly,
