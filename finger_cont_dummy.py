@@ -6,8 +6,8 @@ from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 
-ic_fname = 'fingers/start.finger'
-fc_fname = 'fingers/start.finger.11'
+ic_fname = 'fingers/start.finger.11'
+fc_fname = 'fingers/start.finger.dummy'
 
 f = finger.load(ic_fname)
 f.e = 0.3

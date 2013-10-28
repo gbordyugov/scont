@@ -1,4 +1,4 @@
-from numpy import zeros, append as npappend, dot, zeros_like, ones
+from numpy import zeros, append as npappend, dot, ones
 from numpy.linalg import norm
 
 from continuation import continuation
@@ -13,21 +13,18 @@ f = finger.load('fingers/start.finger.11')
 
 s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
-def sector_ucont(par1name, par2name, par3name):
+def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
   def ue2sector(s, u, p):
+    """ a helper function to map (u, p) --> s"""
     s.flat[:]        = u[:-2]
     s.pars[par2name] = u[ -2]
     s.pars[par3name] = u[ -1]
     s.pars[par1name] = p
   
   
-  def f(u, p):
-    ue2sector(s, u, p)
-    return npappend(s.rhs(), [0.0, 0.0])
-  
-  
-  
   def dfdpar(s, u, p, dpar, d = 1.0e-3):
+    """ a helper function fo numerically approximating the partial
+        derivative of s with respect to s.pars[dpar], evaluated at (u, p)"""
     ue2sector(s, u, p)
   
     s.pars[dpar] += d/2.0; rhs2 = s.rhs()
@@ -35,6 +32,11 @@ def sector_ucont(par1name, par2name, par3name):
     s.pars[dpar] += d/2.0
   
     return (rhs2 - rhs1)/d
+  
+  
+  def f(u, p):
+    ue2sector(s, u, p)
+    return npappend(s.rhs(), [0.0, 0.0])
   
   
   
@@ -59,14 +61,9 @@ def sector_ucont(par1name, par2name, par3name):
       
       mask[imin:imax, jmin:jmax, :] = False
   
-      dsdr     =     dsdr.reshape(s.shape3)
-      dsdtheta = dsdtheta.reshape(s.shape3)
-  
+      mask = mask.reshape(s.shape1)
       dsdr    [mask] = 0.0
       dsdtheta[mask] = 0.0
-    
-      dsdr     = dsdr.reshape(s.shape1)
-      dsdtheta = dsdtheta.reshape(s.shape1)
   
     j = sparse_matrix(s.jacobian())
     j = augmented_matrix(j, dfdpar2, dsdr,     0.0)
@@ -76,8 +73,8 @@ def sector_ucont(par1name, par2name, par3name):
   
   
   def dfdp(u, p):
-    ue2sector(s, u, p)
-    return npappend(dfdpar(s, u, p, par1name), [0.0, 0.0])
+    return zeros(s.ntot+2, dtype=float)
+    # return npappend(dfdpar(s, u, p, par1name), [0.0, 0.0])
   
   
   fname = 'fort.7'
@@ -113,7 +110,8 @@ def sector_ucont(par1name, par2name, par3name):
   u[ -1] = s.pars[par3name]
   p      = s.pars[par1name]
   
-  u, p = continuation(f, dfdx, dfdp, u, p, 1000, 1000.0, callback) 
+  u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback) 
   ue2sector(s, u, p)
-  
-  go()
+  s.save('sectors/ic.sector')
+
+  return s
