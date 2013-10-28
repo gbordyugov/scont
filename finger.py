@@ -16,7 +16,7 @@ from dview import dview
 
 class finger(pickable):
   parnames = ['nx', 'ny', 'nv', 'nsp', 'vx', 'vy', 'lx', 'ly',
-              'a', 'b', 'e', 'f', 'jac', 'D']
+              'a', 'b', 'e', 'f', 'jac', 'D', 'dummy']
   def __init__(self, pars):
     self.__dict__.update(pars)
 

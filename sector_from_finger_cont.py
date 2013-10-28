@@ -1,4 +1,4 @@
-from numpy import zeros, append as npappend, dot, zeros_like
+from numpy import zeros, append as npappend, dot, zeros_like, ones
 from numpy.linalg import norm
 
 from continuation import continuation
@@ -8,7 +8,7 @@ from fhn import FHNNonlinearity, FHNJacobian
 from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 
-f = finger.load('fingers/critical.finger')
+f = finger.load('fingers/start.finger.11')
 
 r = 1.0e6
 
@@ -79,14 +79,13 @@ def dfdx(u, e):
     dsdtheta = dsdtheta.reshape(s.shape3)
 
     k = 20
-    mask = zeros_like(dsdr, dtype=bool)
+    mask = ones(s.shape3, dtype=bool)
     nx, ny, nz = mask.shape
 
     imin, imax = max(i-k, 0), min(i+k, nx)
     jmin, jmax = max(j-k, 0), min(j+k, ny)
     
-    mask[imin:imax, jmin:jmax, :] = True
-    mask = ~mask
+    mask[imin:imax, jmin:jmax, :] = False
 
     dsdr    [mask] = 0.0
     dsdtheta[mask] = 0.0
@@ -106,7 +105,7 @@ def dfdp(u, e):
   return npappend(dfdpar(s, u, e, 'e'), [0.0, 0.0])
 
 
-fname = 's2f.fort.7'
+fname = 'sfromf.fort.7.11point'
 fort7 = open(fname, 'w')
 fort7.close()
 
@@ -141,3 +140,5 @@ def go():
   global u, e
   u, e = continuation(f, dfdx, dfdp, u, e, 1000, -1000.0, callback) 
   ue2sector(s, u, e)
+
+go()

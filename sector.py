@@ -16,7 +16,7 @@ from dview import dview
 
 class sector(pickable):
   parnames = ['nr', 'ntheta', 'nv', 'nsp', 'r', 'R', 'omega', 'arclength',
-              'a', 'b', 'e', 'f', 'jac', 'D']
+              'a', 'b', 'e', 'f', 'jac', 'D', 'dummy']
   def __init__(self, pars):
     self.__dict__.update(pars)
 

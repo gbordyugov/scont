@@ -1,4 +1,4 @@
-from numpy import zeros, append as npappend, dot, zeros_like
+from numpy import zeros, append as npappend, dot, zeros_like, ones
 
 from continuation import continuation
 from sector import sector
@@ -57,14 +57,13 @@ def dfdx(u, e):
     dsdtheta = dsdtheta.reshape(s.shape3)
 
     k = 20
-    mask = zeros_like(dsdr, dtype=bool)
+    mask = ones(s.shape3, dtype=bool)
     nx, ny, nz = mask.shape
 
     imin, imax = max(i-k, 0), min(i+k, nx)
     jmin, jmax = max(j-k, 0), min(j+k, ny)
     
-    mask[imin:imax, jmin:jmax, :] = True
-    mask = ~mask
+    mask[imin:imax, jmin:jmax, :] = False
 
     dsdr    [mask] = 0.0
     dsdtheta[mask] = 0.0
