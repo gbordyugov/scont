@@ -55,6 +55,12 @@ class finger(pickable):
   @property
   def   pars(self): return dview(self.__dict__, self.parnames)
 
+  @property
+  def trans1(self): return self.dxmatrix()*self.flat
+  @property
+  def trans2(self): return self.dymatrix()*self.flat
+
+
   def dxmatrix(self):
     dx = DMatrix(self.nx, self.lx, False, self.nsp)
     return spkron(spkron(dx, eye(self.ny)), eye(self.nv))

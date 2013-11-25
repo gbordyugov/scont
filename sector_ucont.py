@@ -45,8 +45,11 @@ def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
     dfdpar2 = dfdpar(s, u, p, par2name)
     dfdpar3 = dfdpar(s, u, p, par3name)
     
-    dsdr     = s.drmatrix()    *s.flat
-    dsdtheta = s.dthetamatrix()*s.flat
+    # dsdr     = s.drmatrix()    *s.flat
+    # dsdtheta = s.dthetamatrix()*s.flat
+  
+    dsdr     = s.trans1
+    dsdtheta = s.trans2
   
     if True:
       t = tip(s.u, s.v)[0]

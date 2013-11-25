@@ -65,6 +65,12 @@ class sector(pickable):
   @property
   def   pars(self): return dview(self.__dict__, self.parnames)
 
+  @property
+  def trans1(self): return self.drmatrix()    *self.flat
+  @property
+  def trans2(self): return self.dthetamatrix()*self.flat
+
+
 
 
   def drmatrix(self):
