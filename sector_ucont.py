@@ -80,7 +80,7 @@ def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
   fort7 = open(fname, 'w')
   fort7.close()
   
-  solution = []
+  branch = []
   
   def callback(u, p):
     par2 = u[-2]
@@ -89,7 +89,7 @@ def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
           par2name + ': ' + str(par2) + ', ',\
           par3name + ': ' + str(par3) + ', '
   
-    solution.append([p, par2, par3])
+    branch.append([p, par2, par3])
   
     fort7 = open(fname, 'a')
     fort7.write(' '.join(map(str, [p, par2, par3]))+'\n')
@@ -113,4 +113,4 @@ def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
   ue2sector(s, u, p)
   s.save('sectors/ic.sector')
 
-  return s
+  return branch, s

@@ -13,8 +13,6 @@ f = finger.load('fingers/start.finger.11')
 f.dummy = 0.0
 f.nsp = 5
 
-s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
-
 def finger_ucont(f, par1name, par2name, par3name, nsteps, ds):
   def ue2finger(f, u, p):
     """ a helper function to map (u, p) --> f"""
@@ -82,7 +80,7 @@ def finger_ucont(f, par1name, par2name, par3name, nsteps, ds):
   fort7 = open(fname, 'w')
   fort7.close()
   
-  solution = []
+  branch = []
   
   def callback(u, p):
     par2 = u[-2]
@@ -91,7 +89,7 @@ def finger_ucont(f, par1name, par2name, par3name, nsteps, ds):
           par2name + ': ' + str(par2) + ', ',\
           par3name + ': ' + str(par3) + ', '
   
-    solution.append([p, par2, par3])
+    branch.append([p, par2, par3])
   
     fort7 = open(fname, 'a')
     fort7.write(' '.join(map(str, [p, par2, par3]))+'\n')
@@ -115,4 +113,4 @@ def finger_ucont(f, par1name, par2name, par3name, nsteps, ds):
   ue2finger(f, u, p)
   f.save('fingers/ic.finger')
 
-  return f
+  return branch, f
