@@ -101,7 +101,7 @@ class augmented_matrix(base_matrix):
     self.B           = zeros(A.shape[0])
     B                = array(B)
 
-    if norm(B) == 0.0:
+    if False and norm(B) == 0.0:
       print 'Warning: norm(B)=0'
 
     self.B[0:len(B)] = B[:]
@@ -109,7 +109,7 @@ class augmented_matrix(base_matrix):
     self.C           = zeros(A.shape[1])
     C                = array(C)
 
-    if norm(C) == 0.0:
+    if False and norm(C) == 0.0:
       print 'Warning: norm(C)=0'
 
     self.C[0:len(C)] = C[:]

@@ -73,8 +73,7 @@ def sector_ucont(s, par1name, par2name, par3name, nsteps, ds):
   
   
   def dfdp(u, p):
-    return zeros(s.ntot+2, dtype=float)
-    # return npappend(dfdpar(s, u, p, par1name), [0.0, 0.0])
+    return npappend(dfdpar(s, u, p, par1name), [0.0, 0.0])
   
   
   fname = 'fort.7'
