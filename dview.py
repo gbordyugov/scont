@@ -1,5 +1,4 @@
 class dview(dict):
-  pass
   """ This class provides a view to an external dictionary. The view is
       limited by the set of given keys."""
   def __init__(self, d, keys=[]):
