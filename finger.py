@@ -86,7 +86,7 @@ class finger(pickable):
     dx  = self.dxmatrix()  * self.flat
     dy  = self.dymatrix()  * self.flat
     lap = self.lapmatrix() * self.flat
-    f = (self.f(self.data, self.__dict__)).reshape(self.shape1)
+    f = (self.f(self.data, self.pars)).reshape(self.shape1)
 
     return f + self.vx*dx + self.vy*dy + lap
 
@@ -98,7 +98,7 @@ class finger(pickable):
     
     mat = lap + self.vx*dx + self.vy*dy
 
-    j = self.jac(self.data, self.__dict__).transpose((2, 3, 0, 1))
+    j = self.jac(self.data, self.pars).transpose((2, 3, 0, 1))
     n = self.nv*self.nv*self.nx*self.ny
     j = j.reshape(n)
     j = coo_matrix((j, self.jacindices()))
