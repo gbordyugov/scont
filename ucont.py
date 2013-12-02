@@ -51,22 +51,21 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
     trans1 = obj.trans1
     trans2 = obj.trans2
   
-    if True:
-      t = tip(obj.u, obj.v)[0]
-      i, j = int(t[0]), int(t[1])
+    t = tip(obj.u, obj.v)[0]
+    i, j = int(t[0]), int(t[1])
   
-      mask = ones(obj.shape3, dtype=bool)
-      nx, ny, nz = mask.shape
+    mask = ones(obj.shape3, dtype=bool)
+    nx, ny, nz = mask.shape
   
-      k = 20
-      imin, imax = max(i-k, 0), min(i+k, nx)
-      jmin, jmax = max(j-k, 0), min(j+k, ny)
-      
-      mask[imin:imax, jmin:jmax, :] = False
+    k = 20
+    imin, imax = max(i-k, 0), min(i+k, nx)
+    jmin, jmax = max(j-k, 0), min(j+k, ny)
+    
+    mask[imin:imax, jmin:jmax, :] = False
   
-      mask = mask.reshape(obj.shape1)
-      trans1[mask] = 0.0
-      trans2[mask] = 0.0
+    mask = mask.reshape(obj.shape1)
+    trans1[mask] = 0.0
+    trans2[mask] = 0.0
   
     j = sparse_matrix(obj.jacobian())
     j = augmented_matrix(j, dfdpar2, trans1, 0.0)
