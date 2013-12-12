@@ -5,6 +5,8 @@
 #
 # note: no-flux boundary conditions are assumed in both r and theta
 
+from scipy.interpolate import interp2d
+
 from scipy.sparse import kron as spkron, lil_matrix, coo_matrix
 
 from numpy import zeros, eye, linspace, diag, arange, tile
@@ -121,3 +123,21 @@ class finger(pickable):
       coJ[i::nv*nv] += coj[i]
 
     return coI, coJ
+
+
+  def reshape(self, nx, ny):
+    new_data = zeros((nx, ny, self.nv))
+
+    x = arange(self.nx, dtype=float)/self.nx
+    y = arange(self.ny, dtype=float)/self.ny
+
+    for v in xrange(self.nv):
+      z = self.data[...,v].T
+      f = interp2d(x, y, z, kind='quintic')
+      for i in xrange(nx):
+        for j in xrange(ny):
+          new_data[i, j, v] = f(float(i)/nx, float(j)/ny)
+
+    self.data = new_data
+    self.nx = nx
+    self.ny = ny
