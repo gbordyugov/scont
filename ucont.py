@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from numpy import zeros, append as npappend, dot, ones
 from numpy.linalg import norm
 
@@ -11,11 +13,13 @@ from f2s import f2s
 
 f = finger.load('fingers/start.finger.11')
 f.dummy = 0.0
-f.nsp = 5
+f.nsp = 9
 
 s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
 def ucont(obj, par1name, par2name, par3name, nsteps, ds):
+  obj = deepcopy(obj) # to preserve the old object
+
   def ue2object(obj, u, p):
     """ a helper function to map (u, p) --> obj"""
     obj.flat[:]        = u[:-2]
