@@ -91,14 +91,19 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   def callback(u, p):
     par2 = u[-2]
     par3 = u[-1]
+  
+    nrm = norm(u[:-2])
+
     print par1name + ': ' + str(p   ) + ', ',\
           par2name + ': ' + str(par2) + ', ',\
-          par3name + ': ' + str(par3) + ', '
-  
-    branch.append([p, par2, par3])
+          par3name + ': ' + str(par3) + ', ',\
+          'norm'   + ': ' + str(nrm)
+
+    lst = [p, nrm, par2, par3]
+    branch.append(lst)
   
     fort7 = open(fname, 'a')
-    fort7.write(' '.join(map(str, [p, par2, par3]))+'\n')
+    fort7.write(' '.join(map(str, lst))+'\n')
     fort7.close()
   
     flat = u[:-2].reshape(obj.shape3)
@@ -115,7 +120,12 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   u[ -1] = obj.pars[par3name]
   p      = obj.pars[par1name]
   
-  u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback) 
+  try:
+    u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback) 
+  except KeyboardInterrupt:
+    print 'bla-bla'
+    raise
+
   ue2object(obj, u, p)
   obj.save('objects/ic.object')
 
