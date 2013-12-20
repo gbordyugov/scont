@@ -20,7 +20,8 @@ step_factor = 1.5
 
 
 
-def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
+def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
+                 zfuncs=None):
   """
   the main function for performing continuation
 
@@ -36,6 +37,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   ds       : initial step length
   callback : a function that will be called as callback(x, p)
              upon each successful continuation step
+  zfuncs   : a list of functions, zero of which defines additional
+             output points
   """
 
   # first perform some tests
@@ -64,7 +67,12 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   ndim = len(x0)
 
   # a couple of helper functions
-  def compute_ext_rhs(x, p, x0, p0, xp, pp, ds):
+  def compute_z(x, p):
+    """ compute values of zero functions """
+    if zfuncs is not None:
+      return [f(x, p) for f in zfuncs]
+
+  def build_ext_rhs(x, p, x0, p0, xp, pp, ds):
     """ computes right-hand side of the extended system """
     return hstack([f(x, p), dot(x-x0, xp) + (p-p0)*pp - ds])
 
@@ -93,7 +101,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       tv[-1] = 1.0
 
     m = build_ext_matrix(dfdx, x, p, tv)
-    # print m.shape
 
     b = zeros(ndim+1)
     b[-1] = 1.0
@@ -102,9 +109,38 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
     return tv/norm(tv)
 
 
+  def try_continuation_step(x0, p0, jac0, xp, pp, ds):
+    jac = jac0
+
+    x = x0 + xp*ds
+    p = p0 + pp*ds
+
+    nrm = norm(build_ext_rhs(x, p, x0, p0, xp, pp, ds))
+    print '   initial norm:', nrm
+    nstep = 0
+
+    while nrm > tol and nrm < norm_explosion and nstep < itmx:
+      if nstep > 0:                  # otherwise take jac from the computation of
+        jac = dfdx(x, p)             # the tangent vector
+
+      # perform a solve of the Newton's method
+      m  = build_ext_matrix(jac, x, p, tv)
+      b  = build_ext_rhs   (x, p, x0, p0, xp, pp, ds)
+      du = (m.factorize())(-b)
+
+      x += du[:-1] # Newton's update of the solution
+      p += du[ -1]
+      nrm = norm(build_ext_rhs(x, p, x0, p0, xp, pp, ds))
+      print 'nstep', nstep, ',  norm:', nrm
+
+      nstep += 1
+
+    return x, p, jac, nrm, nstep
+
   #
   # main entry point here
   # 
+
 
   jac = dfdx(x0, p0)
   tv = compute_tangent_vector(jac, x0, p0)
@@ -114,37 +150,19 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
 
   cstep = 0
   while cstep < nsteps:
-    print 'cstep:', cstep
+    print 'cstep:', cstep, ', ds:', ds
     cstep += 1
 
-    x = x0 + xp*ds # prediction
-    p = p0 + pp*ds
+    z0 = compute_z(x0, p0)
 
-    nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
-    print '   initial norm:', nrm
-    nstep = 0
-
-    while nrm > tol and nrm < norm_explosion and nstep < itmx:
-      if nstep > 0: # and nstep < nwtn: # otherwise take jac from the computation of
-        jac = dfdx(x, p)             # the tangent vector above
-
-      # perform a solve of the Newton's method
-      m = build_ext_matrix(jac, x, p, tv)
-      b = compute_ext_rhs(x, p, x0, p0, xp, pp, ds)
-      du = (m.factorize())(-b)
-
-      x += du[:-1] # Newton's update of the solution
-      p += du[ -1]
-      nrm = norm(compute_ext_rhs(x, p, x0, p0, xp, pp, ds))
-      print 'nstep', nstep, ',  norm:', nrm
-
-      nstep += 1
+    x, p, jac, nrm, nstep = try_continuation_step(x0, p0, jac, xp, pp, ds)
 
     if nrm <= tol: # converged
       if callback is not None:
-        result = callback(x, p)
-        if result != 0:
+        if callback(x, p) != 0:
           return x, p
+
+      z1 = compute_z(x, p)
 
       x0, p0 = x, p
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available
@@ -153,16 +171,19 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
       pp = tv[ -1]
 
       if nstep <= itmx/3 and abs(ds*step_factor) < abs(dsmax):
-        print 'increasing step to', ds*step_factor
-        ds = ds*step_factor
+        newds = ds*step_factor
+        print 'increasing step to', newds
+        ds = newds
+
       
     else: # not yet converged
       if abs(ds/step_factor) >= abs(dsmin):
-        print 'reducing step to', ds/step_factor/5.0
-        ds = ds/step_factor/5.0
+        newds = ds/step_factor/5.0
+        print 'reducing step to', newds
+        ds = newds
         cstep = cstep-1
       else:
-        print 'no convergence using minimum step size'
+        print 'no convergence using minimum step size, returning'
         return x, p
 
   return x, p
