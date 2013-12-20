@@ -13,7 +13,7 @@ from f2s import f2s
 
 f = finger.load('fingers/start.finger.11')
 f.dummy = 0.0
-f.nsp = 9
+f.nsp = 5
 
 s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
@@ -124,7 +124,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
     u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback) 
   except KeyboardInterrupt:
     print 'bla-bla'
-    raise
+    # raise
 
   ue2object(obj, u, p)
   obj.save('objects/ic.object')
