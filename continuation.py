@@ -72,13 +72,13 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None):
   def build_ext_matrix(dfdx, x, p, tv):
     """ builds the Jacobian matrix of the extended system """
     if   isinstance(dfdx, base_matrix):
-      return augmented_matrix(dfdx,                dfdp(x,p), tv[:-1], tv[-1])
+      return augmented_matrix(dfdx,               dfdp(x,p), tv[:-1], tv[-1])
     elif isinstance(dfdx, list):
-      return augmented_matrix(dense_matrix(dfdx),  dfdp(x,p), tv[:-1], tv[-1])
+      return augmented_matrix(dense_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
     elif isinstance(dfdx, ndarray):
-      return augmented_matrix(dense_matrix(dfdx),  dfdp(x,p), tv[:-1], tv[-1])
+      return augmented_matrix(dense_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
     elif issparse(dfdx):
-      return augmented_matrix(sparse_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
+      return augmented_matrix(sparse_matrix(dfdx),dfdp(x,p), tv[:-1], tv[-1])
     else:
       print 'unknown type of Jacobian matrix, exiting'
       exit(-1)
