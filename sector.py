@@ -43,7 +43,7 @@ class sector(pickable):
 
   # angle
   @property
-  def  theta(self):  return  self.arclength/self.r
+  def  theta(self):  return  self.arclength/self.r2
 
   # deltas
   @property

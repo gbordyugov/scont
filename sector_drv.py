@@ -20,7 +20,7 @@ pars = {'nr'     : 225,     # those ones are to be matched to those
 from numpy import loadtxt
 
 # a small hack - I don't use 'theta' anymore, preferring 'arclength'
-pars['arclength'] = pars['r']*pars['theta']
+pars['arclength'] = (pars['r']+pars['R'])*pars['theta']
 del pars['theta']
 
 s = sector(pars)

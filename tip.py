@@ -56,6 +56,7 @@ def FindTip(u, v, ut=None, vt=None):
     x = root(f, [i+0.5, j+0.5]).x
     foundTips[(int(x[0]), int(x[1]))] = x.tolist()
 
+  # print 'found tips:', foundTips.values()
   return foundTips.values()
 
    
@@ -98,19 +99,3 @@ def DTipDS (data, ut=0.0, vt=0.0, h=1.0e-5):
 
 
   return dtxds, dtyds
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

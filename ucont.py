@@ -18,7 +18,7 @@ f.nsp = 5
 s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
 def ucont(obj, par1name, par2name, par3name, nsteps, ds):
-  obj = deepcopy(obj) # to preserve the old object
+  # obj = deepcopy(obj) # to preserve the old object
 
   def ue2object(obj, u, p):
     """ a helper function to map (u, p) --> obj"""
@@ -61,7 +61,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
     mask = ones(obj.shape3, dtype=bool)
     nx, ny, nz = mask.shape
   
-    k = 20
+    k = 50
     imin, imax = max(i-k, 0), min(i+k, nx)
     jmin, jmax = max(j-k, 0), min(j+k, ny)
     
