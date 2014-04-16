@@ -66,11 +66,13 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
   ndim = len(x0)
 
+
   # a couple of helper functions
   def compute_z(x, p):
-    """ compute values of zero functions """
+    """ returns values of zero functions """
     if zfuncs is not None:
       return [f(x, p) for f in zfuncs]
+
 
   def build_ext_rhs(x, p, x0, p0, xp, pp, ds):
     """ computes right-hand side of the extended system """
@@ -79,17 +81,17 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
   def build_ext_matrix(dfdx, x, p, tv):
     """ builds the Jacobian matrix of the extended system """
-    if   isinstance(dfdx, base_matrix):
-      return augmented_matrix(dfdx,               dfdp(x,p), tv[:-1], tv[-1])
-    elif isinstance(dfdx, list):
-      return augmented_matrix(dense_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
-    elif isinstance(dfdx, ndarray):
-      return augmented_matrix(dense_matrix(dfdx), dfdp(x,p), tv[:-1], tv[-1])
-    elif issparse(dfdx):
-      return augmented_matrix(sparse_matrix(dfdx),dfdp(x,p), tv[:-1], tv[-1])
+    if   isinstance(dfdx, base_matrix):  m = dfdx
+    elif isinstance(dfdx, list):         m = dense_matrix(dfdx)
+    elif isinstance(dfdx, ndarray):      m = dense_matrix(dfdx)
+    elif   issparse(dfdx):               m = sparse_matrix(dfdx)
     else:
       print 'unknown type of Jacobian matrix, exiting'
       exit(-1)
+
+    return augmented_matrix(m, dfdp(x,p), tv[:-1], tv[-1])
+
+
 
 
   def compute_tangent_vector(dfdx, x, p, old=None):
@@ -120,8 +122,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
     nstep = 0
 
     while nrm > tol and nrm < norm_explosion and nstep < itmx:
-      if nstep > 0:                  # otherwise take jac from the computation of
-        jac = dfdx(x, p)             # the tangent vector
+      if nstep > 0:                  # otherwise take jac from the 
+        jac = dfdx(x, p)             # computation of the tangent vector
 
       # perform a solve of the Newton's method
       m  = build_ext_matrix(jac, x, p, tv)
