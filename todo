@@ -1,6 +1,4 @@
 
  - use ``meshgrid'' in computing jacobian
- - introduce try_step() in continuation, possibly more refactoring of the
-   huge continuation() function
  - introduce user zero functions in continuation with the help of
    try_step()
