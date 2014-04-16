@@ -114,6 +114,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
   def try_continuation_step(x0, p0, jac0, xp, pp, ds):
     jac = jac0
 
+    z0 = compute_z(x0, p0)
+
     x = x0 + xp*ds
     p = p0 + pp*ds
 
@@ -136,6 +138,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
       print 'nstep', nstep, ',  norm:', nrm
 
       nstep += 1
+
+    z1 = compute_z(x, p)
 
     return x, p, jac, nrm, nstep
 
