@@ -11,11 +11,11 @@ from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 from f2s import f2s
 
-f = finger.load('fingers/start.finger.11')
-f.dummy = 0.0
-f.nsp = 5
-
-s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
+if __name__ == '__main__':
+  f = finger.load('fingers/start.finger.11')
+  f.dummy = 0.0
+  f.nsp = 5
+  s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
 def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   # obj = deepcopy(obj) # to preserve the old object
