@@ -69,9 +69,11 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
   # a couple of helper functions
   def compute_z(x, p):
-    """ returns values of zero functions """
+    """ returns the product of the values of zero functions """
     if zfuncs is not None:
-      return [f(x, p) for f in zfuncs]
+      return reduce(lambda x, y: x*y, [f(x, p) for f in zfuncs], 1.0)
+    else:
+      return None
 
 
   def build_ext_rhs(x, p, x0, p0, xp, pp, ds):
@@ -114,8 +116,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
   def try_continuation_step(x0, p0, jac0, xp, pp, ds):
     jac = jac0
 
-    z0 = compute_z(x0, p0)
-
     x = x0 + xp*ds
     p = p0 + pp*ds
 
@@ -139,8 +139,6 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
       nstep += 1
 
-    z1 = compute_z(x, p)
-
     return x, p, jac, nrm, nstep
 
   #
@@ -160,6 +158,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
     cstep += 1
 
     z0 = compute_z(x0, p0)
+    print z0
 
     x, p, jac, nrm, nstep = try_continuation_step(x0, p0, jac, xp, pp, ds)
 
@@ -169,6 +168,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
           return x, p
 
       z1 = compute_z(x, p)
+      print z1
 
       x0, p0 = x, p
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available

@@ -112,6 +112,13 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   
     return 0 # continue continuation
   
+
+  def zfunc(pname, pvalue):
+    def f(x, p):
+      ue2object(obj, x, p)
+      return obj.__dict__[pname] - pvalue
+    return f
+
   
   
   u = zeros(len(obj.flat)+2)
@@ -121,7 +128,8 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   p      = obj.pars[par1name]
   
   try:
-    u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback) 
+    u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback,
+                        [zfunc('r', 1.0e6)]) 
   except KeyboardInterrupt:
     print 'bla-bla'
     # raise
