@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from numpy import zeros, append as npappend, dot, ones
+from numpy import zeros, append as npappend, dot, ones, savetxt, array
 from numpy.linalg import norm
 
 from continuation import continuation
@@ -103,7 +103,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
     branch.append(lst)
   
     fort7 = open(fname, 'a')
-    fort7.write(' '.join(map(str, lst))+'\n')
+    savetxt(fort7, array(lst).reshape(1,4), fmt='%.6e')
     fort7.close()
   
     flat = u[:-2].reshape(obj.shape3)
@@ -129,7 +129,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   
   try:
     u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback,
-                        [zfunc('r', 1.0e6)]) 
+                        [zfunc('r', 1.0e6-100.0)]) 
   except KeyboardInterrupt:
     print 'bla-bla'
     # raise
