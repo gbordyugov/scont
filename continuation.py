@@ -146,8 +146,8 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
   # 
 
 
-  jac = dfdx(x0, p0)
-  tv = compute_tangent_vector(jac, x0, p0)
+  jac0 = dfdx(x0, p0)
+  tv = compute_tangent_vector(jac0, x0, p0)
 
   xp = tv[:-1]
   pp = tv[ -1]
@@ -160,9 +160,10 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
     z0 = compute_z(x0, p0)
     print z0
 
-    x, p, jac, nrm, nstep = try_continuation_step(x0, p0, jac, xp, pp, ds)
+    x, p, jac, nrm, nstep = try_continuation_step(x0, p0, jac0, xp, pp, ds)
 
     if nrm <= tol: # converged
+
       if callback is not None:
         if callback(x, p) != 0:
           return x, p
@@ -170,7 +171,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
       z1 = compute_z(x, p)
       print z1
 
-      x0, p0 = x, p
+      x0, p0, jac0 = x, p, jac
       tv = compute_tangent_vector(jac, x, p, tv) # jac is already available
                                                  # and factorized
       xp = tv[:-1]
