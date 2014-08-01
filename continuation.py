@@ -17,11 +17,12 @@ norm_explosion = 1.0e3
 
 # by how much reduce/increase the step size
 step_factor = 1.5
+itmx = 9
 
 
 
 def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
-                 zfuncs=None):
+                 zfuncs=[]):
   """
   the main function for performing continuation
 
@@ -70,10 +71,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
   # a couple of helper functions
   def compute_z(x, p):
     """ returns the product of the values of zero functions """
-    if zfuncs is not None:
-      return reduce(lambda x, y: x*y, [f(x, p) for f in zfuncs], 1.0)
-    else:
-      return None
+    return reduce(lambda x, y: x*y, [f(x, p) for f in zfuncs], 1.0)
 
 
   def build_ext_rhs(x, p, x0, p0, xp, pp, ds):
@@ -96,7 +94,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
 
 
-  def compute_tangent_vector(dfdx, x, p, old=None):
+  def compute_tangent_vector(x, p, old=None):
     """ computes tangent vector along the solution branch """
     if old is not None:
       tv = old
@@ -104,17 +102,25 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
       tv = zeros(ndim+1)
       tv[-1] = 1.0
 
-    m = build_ext_matrix(dfdx, x, p, tv)
+    j = dfdx(x, p)
+    m = build_ext_matrix(j, x, p, tv)
 
     b = zeros(ndim+1)
     b[-1] = 1.0
     tv = (m.factorize())(b)
 
-    return tv/norm(tv)
+    return tv/norm(tv), j
 
 
-  def try_continuation_step(x0, p0, jac0, xp, pp, ds):
-    jac = jac0
+  def costep(x0, p0, ds):
+    """ tries to make a continuation step from (x0, p0)
+    using jac0 as Jacobian and
+          xp and dp as tangen vector along the branch
+          ds is the arclength """
+
+    tv, jac = compute_tangent_vector(x0, p0)
+    xp = tv[:-1]
+    pp = tv[ -1]
 
     x = x0 + xp*ds
     p = p0 + pp*ds
@@ -139,43 +145,67 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
       nstep += 1
 
-    return x, p, jac, nrm, nstep
+    return x, p, nrm, nstep
 
+
+  def secant(x0, p0, x1, p1, s):
+    """ secant method to find zeros of z """
+    print 'sign of z changed'
+
+    def z(s):
+      x, p, nrm, nstep = costep(x0, p0, s)
+      return compute_z(x, p), x, p
+
+    s0 = 0.0
+    s1 = s
+    z0 = compute_z(x0, p0)
+    z1 = compute_z(x1, p1)
+
+    it = 0
+    while it < itmx and abs((s1-s0)/s) > 1.0e-6:
+      dzds = (z1 - z0)/(s1 - s0)
+      news = s1 - z1/dzds
+      z0 = z1
+      s0 = s1
+      s1 = news
+      z1, x, p = z(s1)
+      print 'z1:', z1
+      it = it + 1
+
+    print 'returning'
+    return x, p
+
+
+
+  
+  
   #
   # main entry point here
   # 
 
 
-  jac0 = dfdx(x0, p0)
-  tv = compute_tangent_vector(jac0, x0, p0)
-
-  xp = tv[:-1]
-  pp = tv[ -1]
-
   cstep = 0
   while cstep < nsteps:
-    print 'cstep:', cstep, ', ds:', ds
+    print 'continuation step:', cstep, ', ds:', ds
     cstep += 1
 
     z0 = compute_z(x0, p0)
-    print z0
+    print 'z0:', z0
 
-    x, p, jac, nrm, nstep = try_continuation_step(x0, p0, jac0, xp, pp, ds)
+    x, p, nrm, nstep = costep(x0, p0, ds)
 
     if nrm <= tol: # converged
+      z1 = compute_z(x, p)
+      print 'z1:', z1
+
+      if (z0 > 0.0 and z1 < 0.0) or (z0 < 0.0 and z1 > 0.0):
+        x, p = secant(x0, p0, x, p, ds)
 
       if callback is not None:
         if callback(x, p) != 0:
           return x, p
 
-      z1 = compute_z(x, p)
-      print z1
-
-      x0, p0, jac0 = x, p, jac
-      tv = compute_tangent_vector(jac, x, p, tv) # jac is already available
-                                                 # and factorized
-      xp = tv[:-1]
-      pp = tv[ -1]
+      x0, p0 = x, p
 
       if nstep <= itmx/3 and abs(ds*step_factor) < abs(dsmax):
         newds = ds*step_factor

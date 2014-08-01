@@ -17,16 +17,17 @@ if __name__ == '__main__':
   f.nsp = 5
   s = f2s(f, 1.0e6, {'nsp': 5, 'dummy': 0.0})
 
-def ucont(obj, par1name, par2name, par3name, nsteps, ds):
+
+def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
   # obj = deepcopy(obj) # to preserve the old object
 
+  
   def ue2object(obj, u, p):
     """ a helper function to map (u, p) --> obj"""
     obj.flat[:]        = u[:-2]
     obj.pars[par2name] = u[ -2]
     obj.pars[par3name] = u[ -1]
     obj.pars[par1name] = p
-  
   
   def dfdpar(obj, u, p, dpar, d = 1.0e-3):
     """ a helper function fo numerically approximating the partial
@@ -44,7 +45,6 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   def f(u, p):
     ue2object(obj, u, p)
     return npappend(obj.rhs(), [0.0, 0.0])
-  
   
   
   def dfdx(u, p):
@@ -112,14 +112,6 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   
     return 0 # continue continuation
   
-
-  def zfunc(pname, pvalue):
-    def f(x, p):
-      ue2object(obj, x, p)
-      return obj.__dict__[pname] - pvalue
-    return f
-
-  
   
   u = zeros(len(obj.flat)+2)
   u[:-2] = obj.flat[:]
@@ -128,8 +120,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds):
   p      = obj.pars[par1name]
   
   try:
-    u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback,
-                        [zfunc('r', 1.0e6-100.0)]) 
+    u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback, zfuncs)
   except KeyboardInterrupt:
     print 'bla-bla'
     # raise

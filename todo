@@ -1,4 +1,2 @@
 
- - use ``meshgrid'' in computing jacobian
- - introduce user zero functions in continuation with the help of
-   try_step()
+ - better generation of zero functions
