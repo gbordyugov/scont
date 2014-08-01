@@ -200,6 +200,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
       if (z0 > 0.0 and z1 < 0.0) or (z0 < 0.0 and z1 > 0.0):
         x, p = secant(x0, p0, x, p, ds)
+        return x, p
 
       if callback is not None:
         if callback(x, p) != 0:
