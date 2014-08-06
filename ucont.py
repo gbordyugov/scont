@@ -103,7 +103,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
     branch.append(lst)
   
     fort7 = open(fname, 'a')
-    savetxt(fort7, array(lst).reshape(1,4), fmt='%.6e')
+    savetxt(fort7, array(lst).reshape(1,4), fmt='%.12e')
     fort7.close()
   
     flat = u[:-2].reshape(obj.shape3)

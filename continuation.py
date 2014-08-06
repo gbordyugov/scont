@@ -17,7 +17,6 @@ norm_explosion = 1.0e3
 
 # by how much reduce/increase the step size
 step_factor = 1.5
-itmx = 9
 
 
 
@@ -94,31 +93,26 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
 
 
-  def compute_tangent_vector(x, p, old=None):
+  def compute_tangent_vector(x, p, oldtv=None):
     """ computes tangent vector along the solution branch """
-    if old is not None:
-      tv = old
+    if oldtv is not None:
+      tv = oldtv
     else:
       tv = zeros(ndim+1)
       tv[-1] = 1.0
 
-    j = dfdx(x, p)
-    m = build_ext_matrix(j, x, p, tv)
+    jac = dfdx(x, p)
+    m = build_ext_matrix(jac, x, p, tv)
 
     b = zeros(ndim+1)
     b[-1] = 1.0
     tv = (m.factorize())(b)
 
-    return tv/norm(tv), j
+    return tv/norm(tv), jac
 
 
-  def costep(x0, p0, ds):
-    """ tries to make a continuation step from (x0, p0)
-    using jac0 as Jacobian and
-          xp and dp as tangen vector along the branch
-          ds is the arclength """
-
-    tv, jac = compute_tangent_vector(x0, p0)
+  def costep(x0, p0, ds, oldtv=None):
+    tv, jac = compute_tangent_vector(x0, p0, oldtv)
     xp = tv[:-1]
     pp = tv[ -1]
 
@@ -145,7 +139,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
 
       nstep += 1
 
-    return x, p, nrm, nstep
+    return x, p, tv, nrm, nstep
 
 
   def secant(x0, p0, x1, p1, s):
@@ -153,7 +147,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
     print 'sign of z changed'
 
     def z(s):
-      x, p, nrm, nstep = costep(x0, p0, s)
+      x, p, tv, nrm, nstep = costep(x0, p0, s)
       return compute_z(x, p), x, p
 
     s0 = 0.0
@@ -184,6 +178,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
   # 
 
 
+  tv = None
   cstep = 0
   while cstep < nsteps:
     print 'continuation step:', cstep, ', ds:', ds
@@ -192,7 +187,7 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
     z0 = compute_z(x0, p0)
     print 'z0:', z0
 
-    x, p, nrm, nstep = costep(x0, p0, ds)
+    x, p, tv, nrm, nstep = costep(x0, p0, ds, tv)
 
     if nrm <= tol: # converged
       z1 = compute_z(x, p)
