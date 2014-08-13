@@ -6,7 +6,7 @@ from scipy.sparse import issparse
 
 from sys import exit
 
-tol = 1.0e-8
+tol = 1.0e-5
 itmx = 9
 nwtn = 4
 
