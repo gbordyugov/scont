@@ -35,7 +35,7 @@ def weights(z, x):# , n, m):
         c[i,0] = -c1*c5*c[i-1,0]/c2
 
       for k in xrange(mn,0,-1):
-        c[j,k] = (c4*c[j,k] - k*c[j,k-1])/c3
+        c[j,k] = (c4*c[j,k] - float(k)*c[j,k-1])/c3
 
       c[j,0] = c4*c[j,0]/c3
 
@@ -44,24 +44,26 @@ def weights(z, x):# , n, m):
   return array(zip(*c))
 
 
-def dmatrix(n, length, order, nsp):
+def dmatrix(n, order, nsp):
   """
   returns a 1D finite-difference derivative matrix
+  assumes no-flux boundaries
   Parameters:
   n      : number of points
   order  : order of the derivative
   nsp    : number of stencil points, must be odd
   """
-  m = zeros((n, n))
+  m = zeros((n, n), dtype=float)
 
   # first, fill the bulk of the matrix...
-  x = arange(nsp, dtype=float) - (nsp-1)/2
+  x = arange(nsp, dtype=float) - (nsp-1.0)/2.0
   coefs = weights(0.0, x)[order]
 
-  for (c, i) in zip(coefs, array(x, dtype=int)):
+  for (c, i) in zip(coefs, map(int, x)):
     m += c*diag(ones(n-abs(i)), i)
 
   # ... then the corners
+  # imposing no-flux boundary conditions
   x = arange(nsp, dtype=float) - 1.0
   c0 = weights(0.0, x)[1]
 
@@ -77,18 +79,66 @@ def dmatrix(n, length, order, nsp):
 
   return m
 
-
-nsp = 9
-
-def dm(n, length, perbc=False, nsp=nsp):
-  m = dmatrix(n, length, 1, nsp)
-  odx = 1.0/(float(length)/float(n-1))
-  return lil_matrix(m*odx)
+def dm(n, length, perbc=False, nsp=9):
+  m = dmatrix(n, 1, nsp)
+  dx = float(length)/float(n-1)
+  return lil_matrix(m/dx)
 
 
-def ddm(n, length, perbc=False, nsp=nsp):
-  m = dmatrix(n, length, 2, nsp)
-  odx2 = 1.0/(float(length)/float(n-1))**2
-  return lil_matrix(m*odx2)
+def ddm(n, length, perbc=False, nsp=9):
+  m = dmatrix(n, 2, nsp)
+  dx = float(length)/float(n-1)
+  return lil_matrix(m/dx/dx)
 
-DMatrix, DDMatrix = dm, ddm
+
+
+#
+# simple versions
+# 
+def dM(n, length, perbc=False, nsp=9):
+  m = -diag(ones(n))
+  m = m + diag(ones(n-1), 1)
+
+  m[0,0] = 0.0
+  m[0,1] = 0.0
+
+  m[-1,-1] = 0.0
+  m[-1,-2] = 0.0
+
+  dx = float(length)/float(n-1)
+  return lil_matrix(m/dx)
+
+
+def dMplus(n, length, perbc=False, nsp=9):
+  m =    -1.5*diag(ones(n))
+  m = m + 2.0*diag(ones(n-1), 1)
+  m = m - 0.5*diag(ones(n-2), 2)
+
+  m[0,0] = 0.0
+  m[0,1] = 0.0
+  m[0,2] = 0.0
+
+  m[-1,-1] = 0.0
+  m[-2,-1] = 0.0
+  m[-2,-2] = 1.5
+  m[-2,-3] =-2.0
+  m[-2,-4] = 0.5
+
+
+  dx = float(length)/float(n-1)
+  return lil_matrix(m/dx)
+
+def ddM(n, length, perbc=False, nsp=9):
+  m = -2.0*diag(ones(n))
+  m = m + diag(ones(n-1),  1)
+  m = m + diag(ones(n-1), -1)
+
+  m[ 0, 1] = 2.0
+  m[-1,-2] = 2.0
+
+  dx = float(length)/float(n-1)
+  return lil_matrix(m/dx/dx)
+
+
+# DMatrix, DDMatrix = dm, ddm
+DMatrix, DDMatrix = dMplus, ddM

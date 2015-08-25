@@ -8,9 +8,6 @@ par3ix = -1
 # par1ix =  0
 
 f = finger.load('fingers/ic/e-0.1.finger')
-# f.reshape(int(f.nx*5/3), int(f.ny*5/3))
-# f.nsp = 9
-# f.e = 0.1
 # determine the ``right'' b value
 branch, f = ucont(f, 'dummy', 'b', 'vy',     1,    1.0)
 

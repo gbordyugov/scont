@@ -84,13 +84,27 @@ class finger(pickable):
     return spkron(lapx+lapy, self.D)
 
 
+  def rhs_test(self):
+    """ returns a flat vector """
+    dx  = self.dxmatrix()  * self.flat
+    dy  = self.dymatrix()  * self.flat
+    lap = self.lapmatrix() * self.flat
+    f = (self.f(self.data, self.pars)).reshape(self.shape1)
+
+    return (f + self.vx*dx + self.vy*dy + lap, f, dx, dy, lap)
+
   def rhs(self):
+    """ returns a flat vector """
     dx  = self.dxmatrix()  * self.flat
     dy  = self.dymatrix()  * self.flat
     lap = self.lapmatrix() * self.flat
     f = (self.f(self.data, self.pars)).reshape(self.shape1)
 
     return f + self.vx*dx + self.vy*dy + lap
+
+  def rhs3(self):
+    """ returns a shape3 vector """
+    return self.rhs().reshape(self.shape3)
 
 
   def jacobian(self):

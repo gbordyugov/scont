@@ -4,7 +4,11 @@ def FHNNonlinearity(x, p):
   a = p['a']
   b = p['b']
   e = p['e']
+
+  # u = x[...,0]
+  # v = x[...,1]
   u, v = x[...,0], x[...,1]
+
   f = zeros_like(x)
   f[...,0] = (u-u*u*u/3.0 - v)/e
   f[...,1] = (u - a*v + b)    *e
