@@ -11,7 +11,7 @@ from matrix import sparse_matrix, augmented_matrix
 from tip import FindTip as tip
 from f2s import f2s
 
-if __name__ == '__main__':
+if False and __name__ == '__main__':
   f = finger.load('fingers/start.finger.11')
   f.dummy = 0.0
   f.nsp = 5

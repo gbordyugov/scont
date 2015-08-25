@@ -49,7 +49,6 @@ def dmatrix(n, length, order, nsp):
   returns a 1D finite-difference derivative matrix
   Parameters:
   n      : number of points
-  length : length of the domain
   order  : order of the derivative
   nsp    : number of stencil points, must be odd
   """
@@ -69,9 +68,11 @@ def dmatrix(n, length, order, nsp):
   for j in xrange((nsp-1)/2):
     c = weights(float(j), x)[order]
     c = c - c[0]/c0[0]*c0
-    r = m[j]
+
+    r = m[j]            # take the row of the matrix
     r[0:nsp-1] = c[1:]
-    r = m[-1-j, -1::-1] # reverse of the minus -j-th line of the m
+
+    r = m[-1-j, -1::-1] # reverse of the minus -j-th row of the matrix
     r[0:nsp-1] = c[1:]
 
   return m
