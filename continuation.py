@@ -193,20 +193,23 @@ def continuation(f, dfdx, dfdp, x0, p0, nsteps, ds, callback=None,
       z1 = compute_z(x, p)
       print 'z1:', z1
 
-      if (z0 > 0.0 and z1 < 0.0) or (z0 < 0.0 and z1 > 0.0):
-        x, p = secant(x0, p0, x, p, ds)
-        return x, p
-
       if callback is not None:
         if callback(x, p) != 0:
           return x, p
 
-      x0, p0 = x, p
+      #
+      # check if the sign of test functions has changed
+      #
+      if (z0 > 0.0 and z1 < 0.0) or (z0 < 0.0 and z1 > 0.0):
+        x, p = secant(x0, p0, x, p, ds)
+        return x, p
 
-      if nstep <= itmx/3 and abs(ds*step_factor) < abs(dsmax):
+      if nstep <= itmx/2 and abs(ds*step_factor) < abs(dsmax):
         newds = ds*step_factor
         print 'increasing step to', newds
         ds = newds
+
+      x0, p0 = x, p
 
       
     else: # not yet converged
