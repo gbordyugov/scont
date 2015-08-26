@@ -19,10 +19,20 @@ if False and __name__ == '__main__':
 
 
 def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
-  # obj = deepcopy(obj) # to preserve the old object
+  solution = obj
+  obj = deepcopy(obj) # to preserve the old object
 
   
-  def ue2object(obj, u, p):
+  def object2vector(obj):
+    """ a helper function to map obj --> (u, p)"""
+    u = zeros(len(obj.flat)+2)
+    u[:-2] = obj.flat[:]
+    u[ -2] = obj.pars[par2name]
+    u[ -1] = obj.pars[par3name]
+    p      = obj.pars[par1name]
+    return u, p
+  
+  def vector2object(obj, u, p):
     """ a helper function to map (u, p) --> obj"""
     obj.flat[:]        = u[:-2]
     obj.pars[par2name] = u[ -2]
@@ -33,7 +43,7 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
     """ a helper function fo numerically approximating the partial
         derivative of obj with respect to obj.pars[dpar], evaluated at
         (u, p)"""
-    ue2object(obj, u, p)
+    vector2object(obj, u, p)
   
     obj.pars[dpar] += d/2.0; rhs2 = obj.rhs()
     obj.pars[dpar] -= d    ; rhs1 = obj.rhs()
@@ -43,12 +53,12 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
   
   
   def f(u, p):
-    ue2object(obj, u, p)
+    vector2object(obj, u, p)
     return npappend(obj.rhs(), [0.0, 0.0])
   
   
   def dfdx(u, p):
-    ue2object(obj, u, p)
+    vector2object(obj, u, p)
     dfdpar2 = dfdpar(obj, u, p, par2name)
     dfdpar3 = dfdpar(obj, u, p, par3name)
     
@@ -82,24 +92,28 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
     return npappend(dfdpar(obj, u, p, par1name), [0.0, 0.0])
   
   
+  
+  #
+  # main entry point
+  # 
+
   fname = 'fort.7'
   fort7 = open(fname, 'w')
+  fort7.write('#\n# %s   %s   %s   norm\n#\n'%(par1name, par2name, par3name))
   fort7.close()
-  
+
   branch = []
   
-  def callback(u, p):
+  def callback(u, par1):
     par2 = u[-2]
     par3 = u[-1]
   
     nrm = norm(u[:-2])
 
-    print par1name + ': ' + str(p   ) + ', ',\
-          par2name + ': ' + str(par2) + ', ',\
-          par3name + ': ' + str(par3) + ', ',\
-          'norm'   + ': ' + str(nrm)
+    print '%s: %e, %s: %e, %s: %e, norm: %e'\
+        %(par1name, par1, par2name, par2, par3name, par3, nrm)
 
-    lst = [p, nrm, par2, par3]
+    lst = [par1, par2, par3, nrm]
     branch.append(lst)
   
     fort7 = open(fname, 'a')
@@ -109,15 +123,14 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
     flat = u[:-2].reshape(obj.shape3)
     t = tip(flat[...,0], flat[...,1])[0]
     print 'tip coordinates:', t[0], t[1]
+
+    vector2object(solution, u, par1)
+    solution.save('objects/step.object')
   
     return 0 # continue continuation
   
   
-  u = zeros(len(obj.flat)+2)
-  u[:-2] = obj.flat[:]
-  u[ -2] = obj.pars[par2name]
-  u[ -1] = obj.pars[par3name]
-  p      = obj.pars[par1name]
+  u, p = object2vector(obj)
   
   try:
     u, p = continuation(f, dfdx, dfdp, u, p, nsteps, ds, callback, zfuncs)
@@ -125,7 +138,6 @@ def ucont(obj, par1name, par2name, par3name, nsteps, ds, zfuncs=[]):
     print 'bla-bla'
     # raise
 
-  ue2object(obj, u, p)
-  obj.save('objects/fc.object')
+  solution.save('objects/fc.object')
 
-  return branch, obj
+  return branch, solution
